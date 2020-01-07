@@ -3,6 +3,8 @@ import torch
 import random
 import numpy as np
 
+import albumentations as alb
+
 from src import config
 
 
@@ -100,10 +102,37 @@ class IafossCrop:
         return image
 
 
+class Albumentations:
+    def __init__(self, p=1.0):
+        self.augmentation = alb.Compose([
+                    alb.ShiftScaleRotate(
+                        shift_limit=0.12,
+                        scale_limit=0.12,
+                        rotate_limit=20,
+                        border_mode=cv2.BORDER_CONSTANT,
+                        p=0.75
+                    ),
+                    alb.OneOf([
+                        alb.OpticalDistortion(p=0.25,
+                                              border_mode=cv2.BORDER_CONSTANT),
+                        alb.GridDistortion(p=0.25,
+                                           border_mode=cv2.BORDER_CONSTANT),
+                        alb.IAAPiecewiseAffine(p=0.25),
+                        alb.IAAPerspective(p=0.25),
+                    ], p=0.25),
+                ], p=p)
+
+    def __call__(self, image):
+        augmented = self.augmentation(image=image)
+        image = augmented["image"]
+        return image
+
+
 def get_transforms(train, size):
     if train:
         transforms = Compose([
             IafossCrop(size),
+            Albumentations(),
             ImageToTensor()
         ])
     else:

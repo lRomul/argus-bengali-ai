@@ -39,9 +39,8 @@ RUN pip3 install --no-cache-dir \
     pyarrow==0.15.1 \
     fastparquet==0.3.2 \
     Pillow==6.2.2 \
-    cnn-finetune==0.6.0
-
-RUN apt-get update && apt-get -y install libsm6 libxext6 libxrender-dev
+    cnn-finetune==0.6.0 \
+    albumentations==0.4.3
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
