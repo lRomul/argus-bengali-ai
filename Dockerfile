@@ -3,7 +3,8 @@ FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 RUN apt-get update &&\
     apt-get -y install build-essential yasm nasm cmake unzip git wget \
     sysstat libtcmalloc-minimal4 pkgconf autoconf libtool \
-    python3 python3-pip python3-dev python3-setuptools &&\
+    python3 python3-pip python3-dev python3-setuptools \
+    libsm6 libxext6 libxrender-dev &&\
     ln -s /usr/bin/python3 /usr/bin/python &&\
     ln -s /usr/bin/pip3 /usr/bin/pip &&\
     apt-get clean &&\
@@ -36,7 +37,11 @@ RUN pip3 install --no-cache-dir \
     scikit-image==0.16.2 \
     pytorch-argus==0.0.9 \
     pyarrow==0.15.1 \
-    fastparquet==0.3.2
+    fastparquet==0.3.2 \
+    Pillow==6.2.2 \
+    cnn-finetune==0.6.0
+
+RUN apt-get update && apt-get -y install libsm6 libxext6 libxrender-dev
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
