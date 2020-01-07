@@ -34,7 +34,7 @@ PARAMS = {
     'nn_module': ('cnn_finetune', {
         'model_name': 'se_resnext50_32x4d',
         'pretrained': True,
-        'dropout_p': 0.1
+        'dropout_p': 0.2
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 2.0,
