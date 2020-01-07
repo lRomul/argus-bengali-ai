@@ -34,14 +34,14 @@ PARAMS = {
     'nn_module': ('cnn_finetune', {
         'model_name': 'se_resnext50_32x4d',
         'pretrained': True,
-        'dropout_p': 0.2
+        'dropout_p': 0.1
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 2.0,
         'vowel_weight': 1.0,
         'consonant_weight': 1.0
     }),
-    'optimizer': ('Adam', {'lr': 0.001}),
+    'optimizer': ('Over9000', {'lr': 0.001, 'alpha': 0.5, 'k': 6}),
     'device': 'cuda'
 }
 

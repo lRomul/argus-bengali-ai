@@ -1,8 +1,9 @@
-from argus import Model
+from argus import Model, optimizer
 from argus.utils import deep_detach
 
 from src.models.cnn_finetune import get_cnn_finetune_model
 from src.losses import BengaliAiCrossEntropy
+from src.optimizers import Over9000, RAdam
 
 
 class BengaliAiModel(Model):
@@ -11,6 +12,11 @@ class BengaliAiModel(Model):
     }
     loss = {
         'BengaliAiCrossEntropy': BengaliAiCrossEntropy
+    }
+    optimizer = {
+        **optimizer.get_pytorch_optimizers(),
+        "RAdam": RAdam,
+        "Over9000": Over9000
     }
 
     def __init__(self, params):
