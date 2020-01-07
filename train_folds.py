@@ -24,7 +24,7 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 384
+BATCH_SIZE = 256
 NUM_WORKERS = 8
 USE_AMP = True
 IMAGE_SIZE = 128
@@ -32,7 +32,7 @@ IMAGE_SIZE = 128
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('cnn_finetune', {
-        'model_name': 'resnext50_32x4d',
+        'model_name': 'se_resnext50_32x4d',
         'pretrained': True,
         'dropout_p': 0.1
     }),
