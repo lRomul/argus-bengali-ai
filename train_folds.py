@@ -41,7 +41,7 @@ PARAMS = {
         'vowel_weight': 1.0,
         'consonant_weight': 1.0
     }),
-    'optimizer': ('Over9000', {'lr': 0.001, 'alpha': 0.5, 'k': 6}),
+    'optimizer': ('Adam', {'lr': 0.001}),
     'device': 'cuda'
 }
 

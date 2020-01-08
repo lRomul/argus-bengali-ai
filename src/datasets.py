@@ -14,20 +14,22 @@ def process_raw_image(image):
     return image
 
 
-def get_train_image_date_df():
+def get_image_date_df(image_data_paths):
     data_df_lst = []
-    for train_image_data_path in config.train_image_data_paths:
-        data_df = pd.read_parquet(train_image_data_path)
+    for image_data_path in image_data_paths:
+        print("Load parquet", image_data_path)
+        data_df = pd.read_parquet(image_data_path)
         data_df.set_index('image_id', inplace=True)
         data_df_lst.append(data_df)
 
-    train_image_data_df = pd.concat(data_df_lst)
-    return train_image_data_df
+    image_data_df = pd.concat(data_df_lst)
+    return image_data_df
 
 
 def get_folds_data():
+    print("Get folds data")
     train_folds_df = pd.read_csv(config.train_folds_path)
-    train_image_date_df = get_train_image_date_df()
+    train_image_date_df = get_image_date_df(config.train_image_data_paths)
 
     folds_data = []
     for _, row in train_folds_df.iterrows():
@@ -40,6 +42,25 @@ def get_folds_data():
         folds_data.append(sample)
 
     return folds_data
+
+
+def get_test_data():
+    print("Get test data")
+    test_image_date_df = get_image_date_df(config.test_image_data_paths)
+
+    test_data = []
+    for image_id in test_image_date_df.index:
+
+        image = test_image_date_df.loc[image_id].values
+        image = process_raw_image(image)
+
+        sample = {
+            "image_id": image_id,
+            "image": image
+        }
+        test_data.append(sample)
+
+    return test_data
 
 
 class BengaliAiDataset(Dataset):
@@ -65,6 +86,9 @@ class BengaliAiDataset(Dataset):
         image = sample['image']
         if self.transform is not None:
             image = self.transform(image)
+
+        if not self.target:
+            return image
 
         target = [
             sample['grapheme_root'],
