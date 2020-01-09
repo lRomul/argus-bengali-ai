@@ -24,5 +24,5 @@ def run(command):
 
 
 run('python make_folds.py')
-run(f'python predict_folds.py --experiment {EXPERIMENT_NAME}')
+run(f'python predict.py --experiment {EXPERIMENT_NAME}')
 run('rm -rf argus cnn_finetune pretrainedmodels src')

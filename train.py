@@ -49,8 +49,8 @@ PARAMS = {
 def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
-    train_transform = get_transforms(train=True, size=IMAGE_SIZE)
-    test_transform = get_transforms(train=False, size=IMAGE_SIZE)
+    train_transform = get_transforms(train=True)
+    test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds, transform=train_transform)
     val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)

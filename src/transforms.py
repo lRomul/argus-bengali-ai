@@ -133,16 +133,14 @@ class Albumentations:
         return image
 
 
-def get_transforms(train, size):
+def get_transforms(train):
     if train:
         transforms = Compose([
-            IafossCrop(size),
             Albumentations(),
             ImageToTensor()
         ])
     else:
         transforms = Compose([
-            IafossCrop(size),
             ImageToTensor()
         ])
     return transforms

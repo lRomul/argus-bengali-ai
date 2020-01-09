@@ -17,7 +17,6 @@ EXPERIMENT_DIR = config.experiments_dir / args.experiment
 PREDICTION_DIR = config.predictions_dir / args.experiment
 DEVICE = 'cuda'
 BATCH_SIZE = 256
-IMAGE_SIZE = 128
 
 
 def predict_val_fold(folds_data, predictor, fold):
@@ -69,6 +68,7 @@ def blend_test_predictions():
             pred_lst.append(pred)
 
     pred_df = pd.DataFrame({"row_id": row_ids, "target": pred_lst})
+    pred_df.sort_values("row_id", inplace=True)
 
     if not config.kernel_mode:
         pred_df.to_csv(PREDICTION_DIR / 'submission.csv', index=False)
@@ -77,7 +77,7 @@ def blend_test_predictions():
 
 
 if __name__ == "__main__":
-    transforms = get_transforms(train=False, size=IMAGE_SIZE)
+    transforms = get_transforms(train=False)
     folds_data = None
     if not config.kernel_mode:
         folds_data = get_folds_data()
