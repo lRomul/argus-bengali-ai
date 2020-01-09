@@ -67,10 +67,12 @@ class BengaliAiDataset(Dataset):
                  data,
                  folds=None,
                  target=True,
-                 transform=None):
+                 transform=None,
+                 mixer=None):
         self.folds = folds
         self.target = target
         self.transform = transform
+        self.mixer = mixer
         if folds is None:
             self.data = data
         else:
@@ -79,7 +81,7 @@ class BengaliAiDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
+    def get_sample(self, idx):
         sample = self.data[idx]
 
         image = sample['image']
@@ -89,11 +91,20 @@ class BengaliAiDataset(Dataset):
         if not self.target:
             return image
 
-        target = [
-            sample['grapheme_root'],
-            sample['vowel_diacritic'],
-            sample['consonant_diacritic']
-        ]
-        target = [torch.tensor(t) for t in target]
+        grapheme = torch.zeros(config.n_grapheme_roots, dtype=torch.float32)
+        grapheme[sample['grapheme_root']] = 1.0
+        vowel = torch.zeros(config.n_vowel_diacritics, dtype=torch.float32)
+        vowel[sample['vowel_diacritic']] = 1.0
+        consonant = torch.zeros(config.n_consonant_diacritics, dtype=torch.float32)
+        consonant[sample['consonant_diacritic']] = 1.0
+        target = grapheme, vowel, consonant
+
+        return image, target
+
+    def __getitem__(self, idx):
+        image, target = self.get_sample(idx)
+
+        if self.mixer is not None:
+            image, target = self.mixer(self, image, target)
 
         return image, target

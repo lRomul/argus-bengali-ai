@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
+from src.mixers import UseMixerWithProb, MixUp
 from src.utils import initialize_amp
 from src import config
 
@@ -27,7 +28,7 @@ args = parser.parse_args()
 BATCH_SIZE = 256
 NUM_WORKERS = 8
 USE_AMP = True
-IMAGE_SIZE = 128
+MIX_PROB = 0.8
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
@@ -39,7 +40,8 @@ PARAMS = {
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 2.0,
         'vowel_weight': 1.0,
-        'consonant_weight': 1.0
+        'consonant_weight': 1.0,
+        'binary': True
     }),
     'optimizer': ('Adam', {'lr': 0.001}),
     'device': 'cuda'
@@ -50,9 +52,12 @@ def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
     train_transform = get_transforms(train=True)
+    mixer = UseMixerWithProb(MixUp(alpha_dist='beta'), MIX_PROB)
     test_transform = get_transforms(train=False)
 
-    train_dataset = BengaliAiDataset(folds_data, train_folds, transform=train_transform)
+    train_dataset = BengaliAiDataset(folds_data, train_folds,
+                                     transform=train_transform,
+                                     mixer=mixer)
     val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
