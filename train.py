@@ -28,7 +28,7 @@ args = parser.parse_args()
 BATCH_SIZE = 256
 NUM_WORKERS = 8
 USE_AMP = True
-MIX_PROB = 0.5
+MIX_PROB = 0.8
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
