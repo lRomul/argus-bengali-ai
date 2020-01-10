@@ -38,9 +38,9 @@ PARAMS = {
         'dropout_p': 0.1
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 2.0,
-        'vowel_weight': 1.0,
-        'consonant_weight': 1.0,
+        'grapheme_weight': 0.9032258064516129 * 2,
+        'vowel_weight': 0.05913978494623656,
+        'consonant_weight': 0.03763440860215054,
         'binary': True
     }),
     'optimizer': ('Adam', {'lr': 0.001}),
