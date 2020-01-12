@@ -33,7 +33,7 @@ MIX_PROB = 0.8
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('cnn_finetune', {
-        'model_name': 'se_resnext101_32x4d',
+        'model_name': 'se_resnext50_32x4d',
         'pretrained': True,
         'dropout_p': 0.0
     }),
@@ -43,7 +43,7 @@ PARAMS = {
         'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
-    'optimizer': ('Adam', {'lr': 0.001}),
+    'optimizer': ('Over9000', {'lr': 0.001, 'alpha': 0.5, 'k': 6}),
     'device': 'cuda'
 }
 
