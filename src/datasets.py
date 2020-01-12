@@ -102,9 +102,11 @@ class BengaliAiDataset(Dataset):
         return image, target
 
     def __getitem__(self, idx):
-        image, target = self.get_sample(idx)
-
-        if self.mixer is not None:
-            image, target = self.mixer(self, image, target)
-
-        return image, target
+        if not self.target:
+            image = self.get_sample(idx)
+            return image
+        else:
+            image, target = self.get_sample(idx)
+            if self.mixer is not None:
+                image, target = self.mixer(self, image, target)
+            return image, target
