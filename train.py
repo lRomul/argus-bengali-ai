@@ -33,14 +33,14 @@ MIX_PROB = 0.8
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('cnn_finetune', {
-        'model_name': 'se_resnext50_32x4d',
+        'model_name': 'se_resnext101_32x4d',
         'pretrained': True,
         'dropout_p': 0.0
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 90.323 * 2,
-        'vowel_weight': 5.914,
-        'consonant_weight': 3.763,
+        'grapheme_weight': 9.032258064516129 * 2,
+        'vowel_weight': 0.5913978494623656,
+        'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
     'optimizer': ('Adam', {'lr': 0.001}),
