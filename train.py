@@ -43,7 +43,7 @@ PARAMS = {
         'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
-    'optimizer': ('Over9000', {'lr': 0.001, 'alpha': 0.5, 'k': 6}),
+    'optimizer': ('Adam', {'lr': 0.001}),
     'device': 'cuda'
 }
 
