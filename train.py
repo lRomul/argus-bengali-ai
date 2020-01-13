@@ -39,9 +39,9 @@ PARAMS = {
         'attention': True
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 90.323 * 2,
-        'vowel_weight': 5.914,
-        'consonant_weight': 3.763,
+        'grapheme_weight': 9.032258064516129 * 2,
+        'vowel_weight': 0.5913978494623656,
+        'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
     'optimizer': ('Adam', {'lr': 0.001}),
@@ -75,8 +75,8 @@ def train_fold(save_dir, train_folds, val_folds):
 
     callbacks = [
         MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
-        EarlyStopping(monitor='val_hierarchical_recall', patience=10),
-        ReduceLROnPlateau(monitor='val_hierarchical_recall', factor=0.64, patience=3),
+        EarlyStopping(monitor='val_hierarchical_recall', patience=20),
+        ReduceLROnPlateau(monitor='val_hierarchical_recall', factor=0.64, patience=5),
         LoggingToFile(save_dir / 'log.txt')
     ]
 
