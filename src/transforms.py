@@ -106,25 +106,27 @@ class Albumentations:
     def __init__(self, p=1.0):
         self.augmentation = alb.Compose([
                     alb.ShiftScaleRotate(
-                        shift_limit=0.2,
-                        scale_limit=0.2,
-                        rotate_limit=30,
+                        shift_limit=0.05,
+                        scale_limit=0.25,
+                        rotate_limit=15,
                         border_mode=cv2.BORDER_CONSTANT,
-                        p=0.7
+                        p=0.5
                     ),
                     alb.OneOf([
-                        alb.OpticalDistortion(p=1.0,
-                                              border_mode=cv2.BORDER_CONSTANT),
+                        # alb.OpticalDistortion(p=1.0,
+                        #                       border_mode=cv2.BORDER_CONSTANT),
                         alb.GridDistortion(p=1.0,
-                                           border_mode=cv2.BORDER_CONSTANT),
-                        alb.IAAPiecewiseAffine(p=1.0),
-                        alb.IAAPerspective(p=1.0),
-                        alb.ElasticTransform(sigma=50, alpha=1,
-                                             alpha_affine=10, p=1.0,
-                                             border_mode=cv2.BORDER_CONSTANT)
+                                           border_mode=cv2.BORDER_CONSTANT,
+                                           distort_limit=0.25,
+                                           num_steps=10),
+                        # alb.IAAPiecewiseAffine(p=1.0),
+                        # alb.IAAPerspective(p=1.0),
+                        # alb.ElasticTransform(sigma=50, alpha=1,
+                        #                      alpha_affine=10, p=1.0,
+                        #                      border_mode=cv2.BORDER_CONSTANT)
                     ], p=0.5),
-                    alb.CoarseDropout(max_holes=8, max_height=20,
-                                      max_width=20, fill_value=0, p=0.5)
+                    # alb.CoarseDropout(max_holes=8, max_height=20,
+                    #                   max_width=20, fill_value=0, p=0.5)
                 ], p=p)
 
     def __call__(self, image):
