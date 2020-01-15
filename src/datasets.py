@@ -1,21 +1,17 @@
+from collections import defaultdict
 import numpy as np
 import pandas as pd
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, Sampler
 
-from src.transforms import IafossCrop
 from src import config
-
-
-PROCESSING_TRANSFORM = IafossCrop(size=128, pad=16)
 
 
 def process_raw_image(image):
     image = 255 - image
     image = (image * (255.0 / image.max())).astype(np.uint8)
     image = image.reshape(config.raw_image_shape)
-    # image = PROCESSING_TRANSFORM(image)
     return image
 
 
@@ -62,6 +58,33 @@ def get_test_data():
     return test_data
 
 
+class UniformGraphemeSampler(Sampler):
+    def __init__(self, dataset):
+        self.dataset = dataset
+
+        self.grapheme2index_lst = defaultdict(list)
+        grapheme_roots = [s['grapheme_root'] for s in self.dataset.data]
+        for idx, grapheme in enumerate(grapheme_roots):
+            self.grapheme2index_lst[grapheme].append(idx)
+
+    def __iter__(self):
+        grapheme_indexes = torch.randint(high=len(self.grapheme2index_lst),
+                                         size=(self.__len__(),),
+                                         dtype=torch.int64).tolist()
+        indexes = []
+        for grapheme_index in grapheme_indexes:
+            index_lst = self.grapheme2index_lst[grapheme_index]
+            index = torch.randint(high=len(index_lst),
+                                  size=(1,),
+                                  dtype=torch.int64).item()
+            indexes.append(index_lst[index])
+
+        return iter(indexes)
+
+    def __len__(self):
+        return len(self.dataset)
+
+
 class BengaliAiDataset(Dataset):
     def __init__(self,
                  data,
@@ -77,7 +100,7 @@ class BengaliAiDataset(Dataset):
             self.data = data
         else:
             self.data = [s for s in data if s['fold'] in folds]
-
+            
     def __len__(self):
         return len(self.data)
 
