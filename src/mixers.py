@@ -3,7 +3,7 @@ import numpy as np
 
 
 def get_random_sample(dataset):
-    rnd_idx = random.randint(0, len(dataset) - 1)
+    rnd_idx = dataset.sampler.get_random_index()
     rnd_image, rnd_target = dataset.get_sample(rnd_idx)
     return rnd_image, rnd_target
 

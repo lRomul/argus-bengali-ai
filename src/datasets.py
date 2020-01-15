@@ -67,18 +67,18 @@ class UniformGraphemeSampler(Sampler):
         for idx, grapheme in enumerate(grapheme_roots):
             self.grapheme2index_lst[grapheme].append(idx)
 
-    def __iter__(self):
-        grapheme_indexes = torch.randint(high=len(self.grapheme2index_lst),
-                                         size=(self.__len__(),),
-                                         dtype=torch.int64).tolist()
-        indexes = []
-        for grapheme_index in grapheme_indexes:
-            index_lst = self.grapheme2index_lst[grapheme_index]
-            index = torch.randint(high=len(index_lst),
-                                  size=(1,),
-                                  dtype=torch.int64).item()
-            indexes.append(index_lst[index])
+    def get_random_index(self):
+        grapheme_index = torch.randint(high=len(self.grapheme2index_lst),
+                                       size=(1,),
+                                       dtype=torch.int64).item()
+        index_lst = self.grapheme2index_lst[grapheme_index]
+        index = torch.randint(high=len(index_lst),
+                              size=(1,),
+                              dtype=torch.int64).item()
+        return index_lst[index]
 
+    def __iter__(self):
+        indexes = [self.get_random_index() for _ in range(self.__len__())]
         return iter(indexes)
 
     def __len__(self):
@@ -96,6 +96,7 @@ class BengaliAiDataset(Dataset):
         self.target = target
         self.transform = transform
         self.mixer = mixer
+        self.sampler = None
         if folds is None:
             self.data = data
         else:
