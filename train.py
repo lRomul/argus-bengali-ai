@@ -12,7 +12,11 @@ from argus.callbacks import (
 
 from torch.utils.data import DataLoader
 
-from src.datasets import BengaliAiDataset, get_folds_data
+from src.datasets import (
+    BengaliAiDataset,
+    UniformGraphemeSampler,
+    get_folds_data
+)
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
 from src.mixers import UseMixerWithProb, MixUp
@@ -58,11 +62,13 @@ def train_fold(save_dir, train_folds, val_folds):
     train_dataset = BengaliAiDataset(folds_data, train_folds,
                                      transform=train_transform,
                                      mixer=mixer)
+    sampler = UniformGraphemeSampler(train_dataset)
     val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
                               shuffle=True, drop_last=True,
-                              num_workers=NUM_WORKERS)
+                              num_workers=NUM_WORKERS,
+                              sampler=sampler)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE * 2,
                             shuffle=False, num_workers=NUM_WORKERS)
 
