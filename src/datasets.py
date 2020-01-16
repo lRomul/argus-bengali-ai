@@ -13,7 +13,7 @@ PROCESSING_TRANSFORM = IafossCrop(size=128, pad=16)
 
 def process_raw_image(image):
     image = 255 - image
-    image = (image * (255.0 / image.max())).astype(np.uint8)
+    # image = (image * (255.0 / image.max())).astype(np.uint8)
     image = image.reshape(config.raw_image_shape)
     # image = PROCESSING_TRANSFORM(image)
     return image
