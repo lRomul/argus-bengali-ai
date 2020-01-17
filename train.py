@@ -56,7 +56,7 @@ def train_fold(save_dir, train_folds, val_folds):
         RandomMixer([
             MixUp(alpha_dist='beta'),
             CutMix(num_mix=1, beta=1.0, prob=1.0)
-        ], p=[0.3, 0.7]),
+        ], p=[0.7, 0.3]),
         MIX_PROB)
     test_transform = get_transforms(train=False)
 
