@@ -52,12 +52,7 @@ def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
     train_transform = get_transforms(train=True)
-    mixer = UseMixerWithProb(
-        RandomMixer([
-            MixUp(alpha_dist='beta'),
-            CutMix(num_mix=1, beta=1.0, prob=1.0)
-        ], p=[0.15, 0.85]),
-        MIX_PROB)
+    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
     test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
