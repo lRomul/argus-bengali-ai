@@ -35,7 +35,7 @@ PARAMS = {
     'nn_module': ('cnn_finetune', {
         'model_name': 'se_resnext50_32x4d',
         'pretrained': True,
-        'dropout_p': 0.0
+        'dropout_p': 0.1
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
@@ -56,7 +56,7 @@ def train_fold(save_dir, train_folds, val_folds):
         RandomMixer([
             MixUp(alpha_dist='beta'),
             CutMix(num_mix=1, beta=1.0, prob=1.0)
-        ], p=[0.7, 0.3]),
+        ]),
         MIX_PROB)
     test_transform = get_transforms(train=False)
 
