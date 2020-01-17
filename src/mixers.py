@@ -74,13 +74,9 @@ class CutMix:
             rnd_image, rnd_target = get_random_sample(dataset)
 
             bbx1, bby1, bbx2, bby2 = rand_bbox(image.size(), lam)
-            rnd_image_crop = rnd_image[:, bbx1:bbx2, bby1:bby2]
-
-            rnd_crop_sum = rnd_image_crop.sum()
-            image_sum = image.sum() - image[:, bbx1:bbx2, bby1:bby2].sum()
-
-            image[:, bbx1:bbx2, bby1:bby2] = rnd_image_crop
-            lam = 1 - rnd_crop_sum / (rnd_crop_sum + image_sum)
+            image[:, bbx1:bbx2, bby1:bby2] = rnd_image[:, bbx1:bbx2, bby1:bby2]
+            lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1)
+                       / (image.size()[-1] * image.size()[-2]))
 
             new_target = []
             for trg, rnd_trg in zip(target, rnd_target):
