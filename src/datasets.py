@@ -1,4 +1,5 @@
 import pandas as pd
+import gc
 
 import torch
 from torch.utils.data import Dataset
@@ -40,19 +41,27 @@ def get_folds_data():
     return folds_data
 
 
-def get_test_data():
+def get_test_data_generator(batch=None):
     print("Get test data")
-    test_image_data = get_image_data_dict(config.test_image_data_paths)
+    if batch is None:
+        batch = len(config.test_image_data_paths)
 
-    test_data = []
-    for image_id, image in test_image_data.items():
-        sample = {
-            "image_id": image_id,
-            "image": image
-        }
-        test_data.append(sample)
+    for i in range(0, len(config.test_image_data_paths), batch):
+        test_image_data_paths = config.test_image_data_paths[i:i + batch]
+        test_image_data = get_image_data_dict(test_image_data_paths)
 
-    return test_data
+        test_data = []
+        for image_id, image in test_image_data.items():
+            sample = {
+                "image_id": image_id,
+                "image": image
+            }
+            test_data.append(sample)
+
+        yield test_data
+
+        test_data = []
+        gc.collect()
 
 
 class BengaliAiDataset(Dataset):

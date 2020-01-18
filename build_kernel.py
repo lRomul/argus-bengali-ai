@@ -6,7 +6,7 @@ import gzip
 from pathlib import Path
 
 
-IGNORE_LIST = ["data", "kernel"]
+IGNORE_LIST = ["data/", "kernel/"]
 
 PACKAGES = [
     ('https://github.com/lRomul/argus', 'v0.0.9'),

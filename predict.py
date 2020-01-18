@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from src.utils import get_best_model_path, blend_predictions
-from src.datasets import get_folds_data, get_test_data
+from src.datasets import get_folds_data, get_test_data_generator
 from src.predictor import Predictor
 from src.transforms import get_transforms
 from src import config
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     folds_data = None
     if not config.kernel_mode:
         folds_data = get_folds_data()
-    test_data = get_test_data()
+    test_data = next(get_test_data_generator())
 
     for fold in config.folds:
         print("Predict fold", fold)

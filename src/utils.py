@@ -38,6 +38,10 @@ def get_best_model_path(dir_path: Path, return_score=False):
         if score is not None:
             score = float(score.group(0)[1:-4])
             model_scores.append((model_path, score))
+
+    if not model_scores:
+        return None
+
     model_score = sorted(model_scores, key=lambda x: x[1])
     best_model_path = model_score[-1][0]
     if return_score:

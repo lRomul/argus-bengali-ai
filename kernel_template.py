@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Dict
 
-EXPERIMENT_NAME = 'mixup_006'
+EXPERIMENT_NAME = 'cutmix_009'
 KERNEL_MODE = "predict"
 
 # this is base64 encoded source code
@@ -24,5 +24,5 @@ def run(command):
 
 
 run('python make_folds.py')
-run(f'python predict.py --experiment {EXPERIMENT_NAME}')
+run(f'python kernel_predict.py --experiment {EXPERIMENT_NAME}')
 run('rm -rf argus cnn_finetune pretrainedmodels src')
