@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
-from src.mixers import CutMixPixelSum
+from src.mixers import UseMixerWithProb, CutMix
 from src.utils import initialize_amp
 from src import config
 
@@ -25,10 +25,11 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 128
-NUM_WORKERS = 8
+BATCH_SIZE = 320
+NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
+DEVICES = ['cuda:0', 'cuda:1']
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
@@ -38,13 +39,13 @@ PARAMS = {
         'dropout_p': 0.0
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 9.032258064516129 * 3,
+        'grapheme_weight': 9.032258064516129 * 2,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
-    'optimizer': ('Adam', {'lr': 0.001}),
-    'device': 'cuda'
+    'optimizer': ('Adam', {'lr': 0.0015625}),
+    'device': DEVICES[0]
 }
 
 
@@ -52,9 +53,7 @@ def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
     train_transform = get_transforms(train=True)
-    mixer = CutMixPixelSum(num_mix=1, beta=1.0, prob=1.0,
-                           pixel_sum_weight=0.5)
-
+    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
     test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
@@ -73,6 +72,8 @@ def train_fold(save_dir, train_folds, val_folds):
 
     if USE_AMP:
         initialize_amp(model)
+
+    model.set_device(DEVICES)
 
     callbacks = [
         MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
