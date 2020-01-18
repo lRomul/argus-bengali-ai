@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
-from src.mixers import UseMixerWithProb, MixUp, CutMix, RandomMixer
+from src.mixers import CutMixPixelSum
 from src.utils import initialize_amp
 from src import config
 
@@ -35,7 +35,7 @@ PARAMS = {
     'nn_module': ('cnn_finetune', {
         'model_name': 'se_resnext50_32x4d',
         'pretrained': True,
-        'dropout_p': 0.1
+        'dropout_p': 0.0
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
@@ -52,7 +52,9 @@ def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
     train_transform = get_transforms(train=True)
-    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
+    mixer = CutMixPixelSum(num_mix=1, beta=1.0, prob=1.0,
+                           pixel_sum_weight=0.5)
+
     test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
