@@ -38,7 +38,7 @@ PARAMS = {
         'dropout_p': 0.0
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 9.032258064516129 * 2,
+        'grapheme_weight': 9.032258064516129 * 3,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
         'binary': True
