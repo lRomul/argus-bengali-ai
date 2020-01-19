@@ -55,8 +55,8 @@ def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
     train_transform = get_transforms(train=True)
-    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=0.75), MIX_PROB)
-    tiler = StackTiler(IMAGE_SIZE, axis=1, prob=0.75)
+    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
+    tiler = StackTiler(IMAGE_SIZE, axis=1, prob=0.25)
     test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
