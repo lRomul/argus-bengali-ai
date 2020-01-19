@@ -29,7 +29,7 @@ args = parser.parse_args()
 BATCH_SIZE = 128
 NUM_WORKERS = 12
 USE_AMP = True
-MIX_PROB = 1.0
+MIX_PROB = 0.0
 IMAGE_SIZE = (137, 296)
 DEVICES = ['cuda']
 
