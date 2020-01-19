@@ -16,6 +16,7 @@ from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
 from src.mixers import UseMixerWithProb, CutMix
+from src.tilers import StackTiler
 from src.utils import initialize_amp
 from src import config
 
@@ -25,11 +26,12 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 320
+BATCH_SIZE = 128
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
-DEVICES = ['cuda:0', 'cuda:1']
+IMAGE_SIZE = (137, 296)
+DEVICES = ['cuda']
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
@@ -44,7 +46,7 @@ PARAMS = {
         'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
-    'optimizer': ('Adam', {'lr': 0.0015625}),
+    'optimizer': ('Adam', {'lr': 0.001}),
     'device': DEVICES[0]
 }
 
@@ -54,11 +56,12 @@ def train_fold(save_dir, train_folds, val_folds):
 
     train_transform = get_transforms(train=True)
     mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
+    tiler = StackTiler(IMAGE_SIZE, axis=1, prob=0.5)
     test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
                                      transform=train_transform,
-                                     mixer=mixer)
+                                     mixer=mixer, tiler=tiler)
     val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,

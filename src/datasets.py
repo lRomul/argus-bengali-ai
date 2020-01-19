@@ -70,11 +70,13 @@ class BengaliAiDataset(Dataset):
                  folds=None,
                  target=True,
                  transform=None,
-                 mixer=None):
+                 mixer=None,
+                 tiler=None):
         self.folds = folds
         self.target = target
         self.transform = transform
         self.mixer = mixer
+        self.tiler = tiler
         if folds is None:
             self.data = data
         else:
@@ -103,12 +105,20 @@ class BengaliAiDataset(Dataset):
 
         return image, target
 
+    def get_mixed_sample(self, idx):
+        image, target = self.get_sample(idx)
+        if self.mixer is not None:
+            image, target = self.mixer(self, image, target)
+        return image, target
+
     def __getitem__(self, idx):
         if not self.target:
             image = self.get_sample(idx)
             return image
         else:
-            image, target = self.get_sample(idx)
-            if self.mixer is not None:
-                image, target = self.mixer(self, image, target)
+            image, target = self.get_mixed_sample(idx)
+
+            if self.tiler is not None:
+                image, target = self.tiler(self, image, target)
+
             return image, target
