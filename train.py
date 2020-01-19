@@ -29,7 +29,7 @@ args = parser.parse_args()
 BATCH_SIZE = 128
 NUM_WORKERS = 12
 USE_AMP = True
-MIX_PROB = 0.0
+MIX_PROB = 1.0
 IMAGE_SIZE = (137, 296)
 DEVICES = ['cuda']
 
@@ -55,8 +55,8 @@ def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
     train_transform = get_transforms(train=True)
-    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
-    tiler = StackTiler(IMAGE_SIZE, axis=1, prob=0.5)
+    mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=0.75), MIX_PROB)
+    tiler = StackTiler(IMAGE_SIZE, axis=1, prob=0.75)
     test_transform = get_transforms(train=False)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
