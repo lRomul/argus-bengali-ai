@@ -25,7 +25,7 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 320
+BATCH_SIZE = 1024
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
@@ -34,7 +34,7 @@ DEVICES = ['cuda:0', 'cuda:1']
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('cnn_finetune', {
-        'model_name': 'se_resnext50_32x4d',
+        'model_name': 'resnet34',
         'pretrained': True,
         'dropout_p': 0.0
     }),
@@ -44,7 +44,7 @@ PARAMS = {
         'consonant_weight': 0.3763440860215054,
         'binary': True
     }),
-    'optimizer': ('Adam', {'lr': 0.0015625}),
+    'optimizer': ('Over9000', {'lr': 0.004}),
     'device': DEVICES[0]
 }
 
