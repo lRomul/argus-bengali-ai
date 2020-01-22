@@ -3,6 +3,7 @@ import json
 import argparse
 from subprocess import Popen
 
+import argus
 from argus.callbacks import (
     MonitorCheckpoint,
     EarlyStopping,
@@ -11,6 +12,7 @@ from argus.callbacks import (
 )
 
 from torch.utils.data import DataLoader
+from torchcontrib.optim import SWA
 
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
@@ -45,7 +47,12 @@ PARAMS = {
         'binary': True
     }),
     'optimizer': ('Over9000', {'lr': 0.004}),
-    'device': DEVICES[0]
+    'device': DEVICES[0],
+    'swa': {
+        'swa_start': 50,
+        'swa_freq': 5,
+        'swa_lr': None
+    }
 }
 
 
@@ -75,6 +82,12 @@ def train_fold(save_dir, train_folds, val_folds):
 
     model.set_device(DEVICES)
 
+    @argus.callbacks.on_complete
+    def update_swa_model(state: argus.engine.State):
+        optimizer = state.model.optimizer
+        optimizer.swap_swa_sgd()
+        state.model.save(save_dir / 'swa.pth')
+
     callbacks = [
         MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
         EarlyStopping(monitor='val_hierarchical_recall', patience=20),
@@ -85,8 +98,17 @@ def train_fold(save_dir, train_folds, val_folds):
     model.fit(train_loader,
               val_loader=val_loader,
               max_epochs=500,
-              callbacks=callbacks,
+              callbacks=[*callbacks, update_swa_model],
               metrics=['hierarchical_recall'])
+
+    model = argus.load_model(save_dir / 'swa.pth')
+    SWA.bn_update(train_loader, model.nn_module, device=DEVICES[0])
+    model.save(save_dir / 'swa.pth')
+    model = argus.load_model(save_dir / 'swa.pth')
+
+    model.validate(val_loader,
+                   metrics=['hierarchical_recall'],
+                   callbacks=callbacks)
 
 
 if __name__ == "__main__":

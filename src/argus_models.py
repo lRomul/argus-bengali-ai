@@ -1,3 +1,5 @@
+from torchcontrib.optim import SWA
+
 from argus import Model, optimizer
 from argus.utils import deep_detach
 
@@ -22,6 +24,9 @@ class BengaliAiModel(Model):
     def __init__(self, params):
         super().__init__(params)
         self.amp = None
+
+        if 'swa' in params:
+            self.optimizer = SWA(self.optimizer, **params['swa'])
 
     def train_step(self, batch, state) -> dict:
         self.train()
