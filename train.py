@@ -49,7 +49,7 @@ PARAMS = {
     'optimizer': ('Over9000', {'lr': 0.004}),
     'device': DEVICES[0],
     'swa': {
-        'swa_start': 60,
+        'swa_start': 100,
         'swa_freq': 5,
         'swa_lr': None
     }
