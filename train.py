@@ -18,7 +18,8 @@ from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
 from src.mixers import UseMixerWithProb, CutMix
-from src.utils import initialize_amp
+from src.swa import SWACallback
+from src.utils import initialize_amp, get_best_model_path
 from src import config
 
 
@@ -31,6 +32,8 @@ BATCH_SIZE = 512
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
+SWA_EPOCHS = 5
+SWA_LR = 0.0001
 DEVICES = ['cuda']
 
 SAVE_DIR = config.experiments_dir / args.experiment
@@ -47,12 +50,7 @@ PARAMS = {
         'binary': True
     }),
     'optimizer': ('Over9000', {'lr': 0.004}),
-    'device': DEVICES[0],
-    'swa': {
-        'swa_start': 60,
-        'swa_freq': 5,
-        'swa_lr': None
-    }
+    'device': DEVICES[0]
 }
 
 
@@ -79,14 +77,7 @@ def train_fold(save_dir, train_folds, val_folds):
 
     if USE_AMP:
         initialize_amp(model)
-
     model.set_device(DEVICES)
-
-    @argus.callbacks.on_complete
-    def update_swa_model(state: argus.engine.State):
-        optimizer = state.model.optimizer
-        optimizer.swap_swa_sgd()
-        state.model.save(save_dir / 'swa.pth')
 
     callbacks = [
         MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
@@ -95,20 +86,45 @@ def train_fold(save_dir, train_folds, val_folds):
         LoggingToFile(save_dir / 'log.txt')
     ]
 
+    print("Start training")
     model.fit(train_loader,
               val_loader=val_loader,
               max_epochs=500,
-              callbacks=[*callbacks, update_swa_model],
+              callbacks=callbacks,
               metrics=['hierarchical_recall'])
 
-    model = argus.load_model(save_dir / 'swa.pth')
-    SWA.bn_update(train_loader, model.nn_module, device=DEVICES[0])
-    model.save(save_dir / 'swa.pth')
-    model = argus.load_model(save_dir / 'swa.pth')
+    model_path = get_best_model_path(save_dir)
+    model = argus.load_model(model_path)
+    model.set_device(DEVICES)
+    model.set_lr(SWA_LR)
 
+    print("Start SWA training", model_path)
+    swa_model_path = save_dir / 'swa.pth'
+    model.fit(train_loader,
+              val_loader=val_loader,
+              max_epochs=SWA_EPOCHS,
+              callbacks=[
+                  SWACallback(swa_start=0,
+                              swa_freq=1,
+                              swa_save_path=swa_model_path,
+                              use_amp=USE_AMP),
+                  LoggingToFile(save_dir / 'log.txt')
+              ],
+              metrics=['hierarchical_recall'])
+
+    model = argus.load_model(swa_model_path)
+    SWA.bn_update(train_loader, model.nn_module, device=DEVICES[0])
+    model.save(swa_model_path)
+    model = argus.load_model(swa_model_path)
+
+    print("Start SWA validation")
     model.validate(val_loader,
                    metrics=['hierarchical_recall'],
-                   callbacks=callbacks)
+                   callbacks=[
+                       MonitorCheckpoint(save_dir,
+                                         monitor='val_hierarchical_recall',
+                                         max_saves=1)
+                   ])
 
 
 if __name__ == "__main__":
