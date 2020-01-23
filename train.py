@@ -37,7 +37,8 @@ PARAMS = {
         'encoder': 'resnet34',
         'pretrained': True,
         'dropblock_prob': 0.1,
-        'dropblock_size': 5
+        'dropblock_size': 5,
+        'dropblock_nr_steps': 5000
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,

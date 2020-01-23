@@ -8,7 +8,7 @@ from torchvision.models.resnet import (
     resnet152
 )
 
-from src.models.dropblock import DropBlock2D
+from src.models.dropblock import DropBlock2D, LinearScheduler
 from src.models.classifiers import Classifier
 
 
@@ -26,7 +26,8 @@ class CustomResnet(nn.Module):
                  encoder="resnet34",
                  pretrained=True,
                  dropblock_prob=0.,
-                 dropblock_size=5):
+                 dropblock_size=5,
+                 dropblock_nr_steps=5000):
         super().__init__()
 
         if encoder in ["resnet18", "resnet34"]:
@@ -36,8 +37,13 @@ class CustomResnet(nn.Module):
 
         resnet = ENCODERS[encoder](pretrained=pretrained)
 
-        self.dropblock = DropBlock2D(drop_prob=dropblock_prob,
-                                     block_size=dropblock_size)
+        self.dropblock = LinearScheduler(
+            DropBlock2D(drop_prob=dropblock_prob,
+                        block_size=dropblock_size),
+            start_value=0.,
+            stop_value=dropblock_prob,
+            nr_steps=dropblock_nr_steps
+        )
 
         self.first_layers = nn.Sequential(
             resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool
@@ -52,6 +58,8 @@ class CustomResnet(nn.Module):
         self.classifier = Classifier(self.filters[-1], None)
 
     def forward(self, x):
+        self.dropblock.step()
+
         x = self.first_layers(x)
 
         x = self.dropblock(self.layer1(x))
