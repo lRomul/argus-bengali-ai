@@ -32,8 +32,8 @@ BATCH_SIZE = 512
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
-SWA_EPOCHS = 5
-SWA_LR = 0.0001
+SWA_EPOCHS = 3
+SWA_LR = 0.00003
 DEVICES = ['cuda']
 
 SAVE_DIR = config.experiments_dir / args.experiment
