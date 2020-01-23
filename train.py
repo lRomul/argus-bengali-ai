@@ -43,7 +43,7 @@ PARAMS = {
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
         'binary': True,
-        'smooth_factor': 0.1
+        'smooth_factor': 0.9
     }),
     'optimizer': ('Over9000', {'lr': 0.004}),
     'device': DEVICES[0]
