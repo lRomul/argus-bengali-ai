@@ -36,13 +36,14 @@ PARAMS = {
     'nn_module': ('cnn_finetune', {
         'model_name': 'resnet34',
         'pretrained': True,
-        'dropout_p': 0.4
+        'dropout_p': 0.0
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
-        'binary': True
+        'binary': True,
+        'smooth_factor': 0.1
     }),
     'optimizer': ('Over9000', {'lr': 0.004}),
     'device': DEVICES[0]
