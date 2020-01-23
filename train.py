@@ -25,7 +25,7 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 512
+BATCH_SIZE = 1024
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
@@ -34,7 +34,7 @@ DEVICES = ['cuda']
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('cnn_finetune', {
-        'model_name': 'resnet34',
+        'model_name': 'resnet18',
         'pretrained': True,
         'dropout_p': 0.2
     }),
