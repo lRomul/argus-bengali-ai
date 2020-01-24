@@ -36,8 +36,8 @@ PARAMS = {
     'nn_module': ('CustomResnet', {
         'encoder': 'resnet34',
         'pretrained': True,
-        'dropblock_prob': 0.1,
-        'dropblock_size': 7,
+        'dropblock_prob': 0.2,
+        'dropblock_size': 5,
         'dropblock_nr_steps': 5000
     }),
     'loss': ('BengaliAiCrossEntropy', {
