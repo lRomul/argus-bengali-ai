@@ -10,6 +10,7 @@ from torchvision.models.resnet import (
     resnet152
 )
 from timm import create_model
+from src.models.resnext_wsl import resnext101_32x8d_wsl
 
 from src.models.classifiers import Classifier
 
@@ -22,6 +23,7 @@ ENCODERS = {
     "resnet152": (resnet152, 2048),
     "gluon_resnet34_v1b": (partial(create_model, 'gluon_resnet34_v1b'), 512),
     "gluon_resnet50_v1d": (partial(create_model, 'gluon_resnet50_v1d'), 2048),
+    "resnext101_32x8d_wsl": (resnext101_32x8d_wsl, 2048)
 }
 
 
