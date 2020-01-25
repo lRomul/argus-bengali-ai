@@ -1,3 +1,5 @@
+from functools import partial
+
 import torch
 import torch.nn as nn
 from torchvision.models.resnet import (
@@ -7,43 +9,30 @@ from torchvision.models.resnet import (
     resnet101,
     resnet152
 )
+from timm import create_model
 
-from src.models.dropblock import DropBlock2D, LinearScheduler
 from src.models.classifiers import Classifier
 
 
 ENCODERS = {
-    "resnet18": resnet18,
-    "resnet34": resnet34,
-    "resnet50": resnet50,
-    "resnet101": resnet101,
-    "resnet152": resnet152,
+    "resnet18": (resnet18, 512),
+    "resnet34": (resnet34, 512),
+    "resnet50": (resnet50, 2048),
+    "resnet101": (resnet101, 2048),
+    "resnet152": (resnet152, 2048),
+    "gluon_resnet34_v1b": (partial(create_model, 'gluon_resnet34_v1b'), 512),
+    "gluon_resnet50_v1d": (partial(create_model, 'gluon_resnet50_v1d'), 2048),
 }
 
 
 class CustomResnet(nn.Module):
     def __init__(self,
                  encoder="resnet34",
-                 pretrained=True,
-                 dropblock_prob=0.,
-                 dropblock_size=5,
-                 dropblock_nr_steps=5000):
+                 pretrained=True):
         super().__init__()
 
-        if encoder in ["resnet18", "resnet34"]:
-            self.filters = [64, 128, 256, 512]
-        else:
-            self.filters = [256, 512, 1024, 2048]
-
-        resnet = ENCODERS[encoder](pretrained=pretrained)
-
-        self.dropblock = LinearScheduler(
-            DropBlock2D(drop_prob=dropblock_prob,
-                        block_size=dropblock_size),
-            start_value=0.,
-            stop_value=dropblock_prob,
-            nr_steps=dropblock_nr_steps
-        )
+        resnet, num_bottleneck_filters = ENCODERS[encoder]
+        resnet = resnet(pretrained=pretrained)
 
         self.first_layers = nn.Sequential(
             resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool
@@ -55,15 +44,13 @@ class CustomResnet(nn.Module):
         self.layer4 = resnet.layer4
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.classifier = Classifier(self.filters[-1], None)
+        self.classifier = Classifier(num_bottleneck_filters, None)
 
     def forward(self, x):
-        self.dropblock.step()
-
         x = self.first_layers(x)
 
-        x = self.dropblock(self.layer1(x))
-        x = self.dropblock(self.layer2(x))
+        x = self.layer1(x)
+        x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
 
