@@ -25,7 +25,7 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 512
+BATCH_SIZE = 128
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
@@ -34,7 +34,7 @@ DEVICES = ['cuda']
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('CustomResnet', {
-        'encoder': 'gluon_resnet34_v1b',
+        'encoder': 'gluon_resnet50_v1d',
         'pretrained': True
     }),
     'loss': ('BengaliAiCrossEntropy', {
@@ -44,7 +44,7 @@ PARAMS = {
         'binary': True,
         'smooth_factor': 0.1
     }),
-    'optimizer': ('Over9000', {'lr': 0.004}),
+    'optimizer': ('Over9000', {'lr': 0.001}),
     'device': DEVICES[0]
 }
 
