@@ -59,11 +59,12 @@ class CustomResnet(nn.Module):
 
     def forward(self, x):
         self.dropblock.step()
-
         x = self.first_layers(x)
-
-        x = self.dropblock(self.layer1(x))
-        x = self.dropblock(self.layer2(x))
+        x = self.layer1(x)
+        x = nn.functional.max_pool2d(x, kernel_size=2, stride=2)
+        x = self.dropblock(x)
+        x = self.layer2(x)
+        x = nn.functional.max_pool2d(x, kernel_size=2, stride=2)
         x = self.layer3(x)
         x = self.layer4(x)
 
