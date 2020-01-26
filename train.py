@@ -36,7 +36,8 @@ PARAMS = {
     'nn_module': ('CustomResnet', {
         'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'pooler': 'gem'
+        'pooler': 'gem',
+        'classifier': 'conv'
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,

@@ -11,7 +11,7 @@ from torchvision.models.resnet import (
 from timm import create_model
 from src.models.resnext_wsl import resnext101_32x8d_wsl
 
-from src.models.classifiers import Classifier
+from src.models.classifiers import Classifier, ConvClassifier
 
 
 ENCODERS = {
@@ -31,7 +31,8 @@ class CustomResnet(nn.Module):
     def __init__(self,
                  encoder="resnet34",
                  pretrained=True,
-                 pooler='avgpool'):
+                 pooler='avgpool',
+                 classifier='fc'):
         super().__init__()
 
         resnet, num_bottleneck_filters = ENCODERS[encoder]
@@ -46,7 +47,12 @@ class CustomResnet(nn.Module):
         self.layer3 = resnet.layer3
         self.layer4 = resnet.layer4
 
-        self.classifier = Classifier(num_bottleneck_filters, None, pooler=pooler)
+        if classifier == 'fc':
+            self.classifier = Classifier(num_bottleneck_filters, None, pooler=pooler)
+        elif classifier == 'conv':
+            self.classifier = ConvClassifier(num_bottleneck_filters, None, pooler=pooler)
+        else:
+            raise NotImplementedError
 
     def forward(self, x):
         x = self.first_layers(x)

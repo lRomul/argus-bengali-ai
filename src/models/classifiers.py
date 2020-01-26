@@ -31,8 +31,8 @@ class Mish(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, input):
-        return input * torch.tanh(F.softplus(input))
+    def forward(self, x):
+        return x * torch.tanh(F.softplus(x))
 
 
 class Classifier(nn.Module):
@@ -57,6 +57,53 @@ class Classifier(nn.Module):
         x = self.pooler(x)
         x = torch.flatten(x, 1)
 
+        grapheme = self.grapheme_root_fc(x)
+        vowel = self.vowel_diacritic_fc(x)
+        consonant = self.consonant_diacritic_fc(x)
+        return grapheme, vowel, consonant
+
+
+class ConvBranch(nn.Module):
+    def __init__(self, in_features, num_classes, pooler='avgpool'):
+        super().__init__()
+        self.conv = nn.Sequential(
+            Mish(),
+            nn.Conv2d(in_features, in_features, 3, 1, 1, bias=False),
+            nn.BatchNorm2d(in_features)
+        )
+
+        if pooler == 'gem':
+            self.pooler = GeM(p=3, eps=1e-6)
+        elif pooler == 'avgpool':
+            self.pooler = nn.AdaptiveAvgPool2d((1, 1))
+        else:
+            raise NotImplementedError
+
+        self.fc = nn.Linear(in_features, num_classes)
+
+    def __call__(self, x):
+        x = self.conv(x)
+        x = self.pooler(x)
+        x = torch.flatten(x, 1)
+        x = self.fc(x)
+        return x
+
+
+class ConvClassifier(nn.Module):
+    def __init__(self, in_features, num_classes, pooler='avgpool'):
+        super().__init__()
+
+        self.grapheme_root_fc = ConvBranch(in_features,
+                                           config.n_grapheme_roots,
+                                           pooler)
+        self.vowel_diacritic_fc = ConvBranch(in_features,
+                                             config.n_vowel_diacritics,
+                                             pooler)
+        self.consonant_diacritic_fc = ConvBranch(in_features,
+                                                 config.n_consonant_diacritics,
+                                                 pooler)
+
+    def forward(self, x):
         grapheme = self.grapheme_root_fc(x)
         vowel = self.vowel_diacritic_fc(x)
         consonant = self.consonant_diacritic_fc(x)
