@@ -9,9 +9,7 @@ from pathlib import Path
 IGNORE_LIST = ["data/", "kernel/"]
 
 PACKAGES = [
-    ('https://github.com/lRomul/argus', 'v0.0.9'),
-    ('https://github.com/creafz/pytorch-cnn-finetune', 'master'),
-    ('https://github.com/Cadene/pretrained-models.pytorch', 'master')
+    ('https://github.com/lRomul/argus', 'v0.0.9')
 ]
 
 

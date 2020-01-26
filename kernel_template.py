@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Dict
 
-EXPERIMENT_NAME = 'resnet34_001'
+EXPERIMENT_NAME = 'gluon_resnet50_001'
 KERNEL_MODE = "predict"
 
 # this is base64 encoded source code
@@ -22,6 +22,10 @@ def run(command):
     os.system('export PYTHONPATH=${PYTHONPATH}:/kaggle/working && '
               f'export KERNEL_MODE={KERNEL_MODE} && ' + command)
 
+
+run('pip install /kaggle/input/bengali-ai-deps/pretrained-models.pytorch')
+run('pip install /kaggle/input/bengali-ai-deps/pytorch-cnn-finetune')
+run('pip install /kaggle/input/bengali-ai-deps/pytorch-image-models')
 
 run('python make_folds.py')
 run(f'python kernel_predict.py --experiment {EXPERIMENT_NAME}')
