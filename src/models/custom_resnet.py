@@ -1,6 +1,5 @@
 from functools import partial
 
-import torch
 import torch.nn as nn
 from torchvision.models.resnet import (
     resnet18,
@@ -23,6 +22,7 @@ ENCODERS = {
     "resnet152": (resnet152, 2048),
     "gluon_resnet34_v1b": (partial(create_model, 'gluon_resnet34_v1b'), 512),
     "gluon_resnet50_v1d": (partial(create_model, 'gluon_resnet50_v1d'), 2048),
+    "gluon_seresnext50_32x4d": (partial(create_model, 'gluon_seresnext50_32x4d'), 2048),
     "resnext101_32x8d_wsl": (resnext101_32x8d_wsl, 2048)
 }
 
@@ -30,7 +30,8 @@ ENCODERS = {
 class CustomResnet(nn.Module):
     def __init__(self,
                  encoder="resnet34",
-                 pretrained=True):
+                 pretrained=True,
+                 pooler='avgpool'):
         super().__init__()
 
         resnet, num_bottleneck_filters = ENCODERS[encoder]
@@ -45,8 +46,7 @@ class CustomResnet(nn.Module):
         self.layer3 = resnet.layer3
         self.layer4 = resnet.layer4
 
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.classifier = Classifier(num_bottleneck_filters, None)
+        self.classifier = Classifier(num_bottleneck_filters, None, pooler=pooler)
 
     def forward(self, x):
         x = self.first_layers(x)
@@ -56,8 +56,6 @@ class CustomResnet(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
 
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
         x = self.classifier(x)
 
         return x
