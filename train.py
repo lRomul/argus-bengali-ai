@@ -34,7 +34,7 @@ DEVICES = ['cuda']
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('CustomResnet', {
-        'encoder': 'gluon_seresnext50_32x4d',
+        'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
         'pooler': 'gem'
     }),
