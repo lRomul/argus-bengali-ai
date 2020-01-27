@@ -64,11 +64,12 @@ class Classifier(nn.Module):
 
 
 class ConvBranch(nn.Module):
-    def __init__(self, in_features, num_classes, pooler='avgpool'):
+    def __init__(self, in_features, num_classes, pooler='avgpool', ratio=4):
         super().__init__()
         self.conv = nn.Sequential(
             Mish(),
-            nn.Conv2d(in_features, in_features, 3, 1, 1, bias=False),
+            nn.Conv2d(in_features, in_features // ratio,
+                      3, 1, 1, bias=False),
             nn.BatchNorm2d(in_features)
         )
 
@@ -79,7 +80,7 @@ class ConvBranch(nn.Module):
         else:
             raise NotImplementedError
 
-        self.fc = nn.Linear(in_features, num_classes)
+        self.fc = nn.Linear(in_features // ratio, num_classes)
 
     def __call__(self, x):
         x = self.conv(x)
