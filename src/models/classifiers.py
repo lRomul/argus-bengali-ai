@@ -70,7 +70,7 @@ class ConvBranch(nn.Module):
             Mish(),
             nn.Conv2d(in_features, in_features // ratio,
                       3, 1, 1, bias=False),
-            nn.BatchNorm2d(in_features)
+            nn.BatchNorm2d(in_features // ratio)
         )
 
         if pooler == 'gem':
