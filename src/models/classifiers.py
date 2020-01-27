@@ -91,18 +91,21 @@ class ConvBranch(nn.Module):
 
 
 class ConvClassifier(nn.Module):
-    def __init__(self, in_features, num_classes, pooler='avgpool'):
+    def __init__(self, in_features, num_classes, pooler='avgpool', ratio=4):
         super().__init__()
 
         self.grapheme_root_fc = ConvBranch(in_features,
                                            config.n_grapheme_roots,
-                                           pooler)
+                                           pooler=pooler,
+                                           ratio=ratio)
         self.vowel_diacritic_fc = ConvBranch(in_features,
                                              config.n_vowel_diacritics,
-                                             pooler)
+                                             pooler=pooler,
+                                             ratio=ratio)
         self.consonant_diacritic_fc = ConvBranch(in_features,
                                                  config.n_consonant_diacritics,
-                                                 pooler)
+                                                 pooler=pooler,
+                                                 ratio=ratio)
 
     def forward(self, x):
         grapheme = self.grapheme_root_fc(x)

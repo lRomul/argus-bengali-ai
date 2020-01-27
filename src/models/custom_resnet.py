@@ -31,9 +31,10 @@ class CustomResnet(nn.Module):
     def __init__(self,
                  encoder="resnet34",
                  pretrained=True,
-                 pooler='avgpool',
-                 classifier='fc'):
+                 classifier=None):
         super().__init__()
+        if classifier is None:
+            classifier = 'fc', {'pooler': 'avgpool'}
 
         resnet, num_bottleneck_filters = ENCODERS[encoder]
         resnet = resnet(pretrained=pretrained)
@@ -47,10 +48,12 @@ class CustomResnet(nn.Module):
         self.layer3 = resnet.layer3
         self.layer4 = resnet.layer4
 
-        if classifier == 'fc':
-            self.classifier = Classifier(num_bottleneck_filters, None, pooler=pooler)
-        elif classifier == 'conv':
-            self.classifier = ConvClassifier(num_bottleneck_filters, None, pooler=pooler)
+        if classifier[0] == 'fc':
+            self.classifier = Classifier(num_bottleneck_filters, None,
+                                         **classifier[1])
+        elif classifier[0] == 'conv':
+            self.classifier = ConvClassifier(num_bottleneck_filters, None,
+                                             **classifier[1])
         else:
             raise NotImplementedError
 
