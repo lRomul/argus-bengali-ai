@@ -38,7 +38,7 @@ PARAMS = {
         'pretrained': True,
         'classifier': ('conv', {
             'pooler': 'gem',
-            'ratio': 4
+            'ratio': 2
         })
     }),
     'loss': ('BengaliAiCrossEntropy', {
