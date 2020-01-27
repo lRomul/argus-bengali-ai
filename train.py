@@ -37,8 +37,8 @@ PARAMS = {
         'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
         'classifier': ('conv', {
-            'pooler': 'avgpool',
-            'ratio': 2
+            'pooler': 'gem',
+            'ratio': 4
         })
     }),
     'loss': ('BengaliAiCrossEntropy', {
