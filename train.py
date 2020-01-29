@@ -25,7 +25,8 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-BATCH_SIZE = 128
+IMAGE_SIZE = 224
+BATCH_SIZE = 112
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0
@@ -56,9 +57,9 @@ PARAMS = {
 def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
 
-    train_transform = get_transforms(train=True)
+    train_transform = get_transforms(train=True, size=IMAGE_SIZE)
     mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
-    test_transform = get_transforms(train=False)
+    test_transform = get_transforms(train=False, size=IMAGE_SIZE)
 
     train_dataset = BengaliAiDataset(folds_data, train_folds,
                                      transform=train_transform,
