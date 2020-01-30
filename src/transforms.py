@@ -217,10 +217,10 @@ class Albumentations:
                                            distort_limit=0.25,
                                            num_steps=10)
                     ], p=0.5),
-                    alb.OneOf([
-                        GridMask(num_grid=(3, 5), mode=0),
-                        GridMask(num_grid=(3, 5), mode=2),
-                    ], p=0.7)
+                    # alb.OneOf([
+                    #     GridMask(num_grid=(3, 5), mode=0),
+                    #     GridMask(num_grid=(3, 5), mode=2),
+                    # ], p=0.7)
                 ], p=p)
 
     def __call__(self, image):
