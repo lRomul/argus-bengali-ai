@@ -35,17 +35,21 @@ class Mish(nn.Module):
         return x * torch.tanh(F.softplus(x))
 
 
+def get_pooler(pooler):
+    if pooler == 'gem':
+        return GeM(p=3, eps=1e-6)
+    elif pooler == 'avgpool':
+        return nn.AdaptiveAvgPool2d((1, 1))
+    elif pooler == 'none':
+        return lambda x: x
+    else:
+        raise NotImplementedError
+
+
 class Classifier(nn.Module):
     def __init__(self, in_features, num_classes, pooler='avgpool'):
         super().__init__()
-
-        if pooler == 'gem':
-            self.pooler = GeM(p=3, eps=1e-6)
-        elif pooler == 'avgpool':
-            self.pooler = nn.AdaptiveAvgPool2d((1, 1))
-        else:
-            raise NotImplementedError
-
+        self.pooler = get_pooler(pooler)
         self.grapheme_root_fc = nn.Linear(in_features,
                                           config.n_grapheme_roots)
         self.vowel_diacritic_fc = nn.Linear(in_features,
@@ -72,14 +76,7 @@ class ConvBranch(nn.Module):
                       3, 1, 1, bias=False),
             nn.BatchNorm2d(in_features // ratio)
         )
-
-        if pooler == 'gem':
-            self.pooler = GeM(p=3, eps=1e-6)
-        elif pooler == 'avgpool':
-            self.pooler = nn.AdaptiveAvgPool2d((1, 1))
-        else:
-            raise NotImplementedError
-
+        self.pooler = get_pooler(pooler)
         self.fc = nn.Linear(in_features // ratio, num_classes)
 
     def __call__(self, x):

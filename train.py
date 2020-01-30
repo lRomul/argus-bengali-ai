@@ -25,21 +25,19 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-IMAGE_SIZE = 224
-BATCH_SIZE = 112
-NUM_WORKERS = 12
+IMAGE_SIZE = 240
+BATCH_SIZE = 128
+NUM_WORKERS = 8
 USE_AMP = True
 MIX_PROB = 1.0
 DEVICES = ['cuda']
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
-    'nn_module': ('CustomResnet', {
-        'encoder': 'gluon_resnet50_v1d',
+    'nn_module': ('CustomEfficient', {
+        'encoder': 'tf_efficientnet_b1',
         'pretrained': True,
-        'classifier': ('fc', {
-            'pooler': 'avgpool'
-        })
+        'classifier': ('fc', {'pooler': 'none'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
