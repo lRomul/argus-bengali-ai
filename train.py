@@ -26,7 +26,7 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = 224
-BATCH_SIZE = 128
+BATCH_SIZE = 112
 NUM_WORKERS = 12
 USE_AMP = True
 MIX_PROB = 1.0

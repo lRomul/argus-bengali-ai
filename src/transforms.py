@@ -230,7 +230,7 @@ class Albumentations:
                         GridMask(num_grid=(3, 5), mode=0),
                         GridMask(num_grid=(3, 5), mode=1),
                         GridMask(num_grid=(3, 5), mode=2),
-                    ], p=0.5)
+                    ], p=0.0)
                 ], p=p)
 
     def __call__(self, image):
