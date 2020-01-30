@@ -202,8 +202,12 @@ class GridMask(DualTransform):
 
 
 class Albumentations:
-    def __init__(self, p=1.0):
+    def __init__(self, size, p=1.0):
         self.augmentation = alb.Compose([
+                    alb.RandomResizedCrop(size, size,
+                                          scale=(0.7, 1.0),
+                                          ratio=(0.9, 1.1),
+                                          p=0.5),
                     alb.ShiftScaleRotate(
                         shift_limit=0.05,
                         scale_limit=0.25,
@@ -242,7 +246,7 @@ def get_transforms(train, size):
     if train:
         transforms = Compose([
             Resize((size, size)),
-            Albumentations(),
+            Albumentations(size),
             ImageToTensor()
         ])
     else:
