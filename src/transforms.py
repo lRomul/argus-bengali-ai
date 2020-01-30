@@ -212,25 +212,15 @@ class Albumentations:
                         p=0.5
                     ),
                     alb.OneOf([
-                        # alb.OpticalDistortion(p=1.0,
-                        #                       border_mode=cv2.BORDER_CONSTANT),
                         alb.GridDistortion(p=1.0,
                                            border_mode=cv2.BORDER_CONSTANT,
                                            distort_limit=0.25,
-                                           num_steps=10),
-                        # alb.IAAPiecewiseAffine(p=1.0),
-                        # alb.IAAPerspective(p=1.0),
-                        # alb.ElasticTransform(sigma=50, alpha=1,
-                        #                      alpha_affine=10, p=1.0,
-                        #                      border_mode=cv2.BORDER_CONSTANT)
+                                           num_steps=10)
                     ], p=0.5),
-                    # alb.CoarseDropout(max_holes=8, max_height=20,
-                    #                   max_width=20, fill_value=0, p=0.5)
                     alb.OneOf([
                         GridMask(num_grid=(3, 5), mode=0),
-                        GridMask(num_grid=(3, 5), mode=1),
                         GridMask(num_grid=(3, 5), mode=2),
-                    ], p=0.0)
+                    ], p=0.7)
                 ], p=p)
 
     def __call__(self, image):
