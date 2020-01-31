@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from typing import Dict
 
-EXPERIMENT_NAME = 'gluon_resnet50_001'
+EXPERIMENT_NAME = 'gridmask_003'
 KERNEL_MODE = "predict"
 
 # this is base64 encoded source code
