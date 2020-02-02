@@ -19,8 +19,8 @@ def get_image_data_dict(image_data_paths):
         print("Load parquet", image_data_path)
         data_df = pd.read_parquet(image_data_path)
         data_df.set_index('image_id', inplace=True)
-        for image_id, row in data_df.iterrows():
-            image = process_raw_image(row.values)
+        for image_id, raw_image in zip(data_df.index, data_df.values):
+            image = process_raw_image(raw_image)
             image_data_dict[image_id] = image
 
     return image_data_dict
