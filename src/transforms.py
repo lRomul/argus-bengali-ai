@@ -230,7 +230,7 @@ class Albumentations:
 
 
 class Resize:
-    def __init__(self, size, interpolation=cv2.INTER_NEAREST):
+    def __init__(self, size, interpolation=cv2.INTER_CUBIC):
         self.size = tuple(size)
         self.interpolation = interpolation
 
@@ -239,15 +239,20 @@ class Resize:
 
 
 def get_transforms(train, size):
+    if size is None:
+        resize = lambda x: x
+    else:
+        resize = Resize((size, size))
+
     if train:
         transforms = Compose([
-            Resize((size, size)),
+            resize,
             Albumentations(),
             ImageToTensor()
         ])
     else:
         transforms = Compose([
-            Resize((size, size)),
+            resize,
             ImageToTensor()
         ])
     return transforms

@@ -8,6 +8,7 @@ from src.models.classifiers import Classifier, ConvClassifier
 
 ENCODERS = {
     "tf_efficientnet_b1": (partial(create_model, 'tf_efficientnet_b1'), 1280),
+    "efficientnet_b0": (partial(create_model, 'efficientnet_b0'), 1280)
 }
 
 

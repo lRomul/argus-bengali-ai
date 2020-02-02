@@ -25,8 +25,8 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-IMAGE_SIZE = 240
-BATCH_SIZE = 128
+IMAGE_SIZE = None
+BATCH_SIZE = 224
 NUM_WORKERS = 8
 USE_AMP = True
 MIX_PROB = 1.0
@@ -34,19 +34,19 @@ DEVICES = ['cuda']
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
-    'nn_module': ('CustomEfficient', {
-        'encoder': 'tf_efficientnet_b1',
+    'nn_module': ('CustomResnet', {
+        'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'classifier': ('fc', {'pooler': 'none'})
+        'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
-        'binary': True,
-        'smooth_factor': 0.1
+        'smooth_factor': 0.1,
+        'ohem_rate': 0.7
     }),
-    'optimizer': ('Over9000', {'lr': 0.001}),
+    'optimizer': ('Over9000', {'lr': 0.001 * (BATCH_SIZE / 128)}),
     'device': DEVICES[0]
 }
 

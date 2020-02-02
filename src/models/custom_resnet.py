@@ -23,7 +23,9 @@ ENCODERS = {
     "gluon_resnet34_v1b": (partial(create_model, 'gluon_resnet34_v1b'), 512),
     "gluon_resnet50_v1d": (partial(create_model, 'gluon_resnet50_v1d'), 2048),
     "gluon_seresnext50_32x4d": (partial(create_model, 'gluon_seresnext50_32x4d'), 2048),
-    "resnext101_32x8d_wsl": (resnext101_32x8d_wsl, 2048)
+    "resnext101_32x8d_wsl": (resnext101_32x8d_wsl, 2048),
+    "seresnext26t_32x4d": (partial(create_model, 'seresnext26t_32x4d'), 2048),
+    "resnet50_jsd": (partial(create_model, 'resnet50'), 2048),
 }
 
 
