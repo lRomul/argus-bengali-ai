@@ -91,7 +91,7 @@ def train_fold(save_dir, train_folds, val_folds):
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=50),
-            CosineAnnealingLR(T_max=12),
+            CosineAnnealingLR(T_max=26),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
