@@ -41,8 +41,15 @@ class CustomResnet(nn.Module):
         resnet, num_bottleneck_filters = ENCODERS[encoder]
         resnet = resnet(pretrained=pretrained)
 
+        if hasattr(resnet, 'relu'):
+            act = resnet.relu
+        elif hasattr(resnet, 'act1'):
+            act = resnet.act1
+        else:
+            raise Exception
+
         self.first_layers = nn.Sequential(
-            resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool
+            resnet.conv1, resnet.bn1, act, resnet.maxpool
         )
 
         self.layer1 = resnet.layer1

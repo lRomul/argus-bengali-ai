@@ -42,8 +42,7 @@ RUN pip3 install --no-cache-dir \
     cnn-finetune==0.6.0 \
     albumentations==0.4.3
 
-RUN git clone --depth 1 -b v0.1-selecsls https://github.com/rwightman/pytorch-image-models.git &&\
-    cd pytorch-image-models && python setup.py install
+RUN pip install timm==0.1.16
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
