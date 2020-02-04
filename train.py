@@ -26,13 +26,13 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [512, 256, 176]
+BATCH_SIZE = [448, 224, 154]
 TRAIN_EPOCHS = [40, 40, 120]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
 MIX_PROB = 1.0
-AUTO_AUGMENT = 'rand-m9-mstd0.5-inc1'
+AUTO_AUGMENT = 'rand-m5-mstd0.5-inc1'
 DEVICES = ['cuda']
 
 
