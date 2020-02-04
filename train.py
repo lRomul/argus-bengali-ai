@@ -7,7 +7,7 @@ from argus.callbacks import (
     MonitorCheckpoint,
     EarlyStopping,
     LoggingToFile,
-    CosineAnnealingWarmRestarts
+    CosineAnnealingLR
 )
 
 from torch.utils.data import DataLoader
@@ -53,7 +53,7 @@ PARAMS = {
         'smooth_factor': 0.1,
         'ohem_rate': 0.8
     }),
-    'optimizer': ('Adam', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
+    'optimizer': ('Over9000', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0]
 }
 
@@ -91,7 +91,7 @@ def train_fold(save_dir, train_folds, val_folds):
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=50),
-            CosineAnnealingWarmRestarts(T_0=12, T_mult=2),
+            CosineAnnealingLR(T_max=12),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
