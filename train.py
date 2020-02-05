@@ -47,7 +47,7 @@ PARAMS = {
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 2,
+        'grapheme_weight': 1,
         'vowel_weight': 1,
         'consonant_weight': 1,
         'ohem_rate': 0.8
