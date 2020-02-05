@@ -47,10 +47,9 @@ PARAMS = {
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 9.032258064516129 * 2,
-        'vowel_weight': 0.5913978494623656,
-        'consonant_weight': 0.3763440860215054,
-        'smooth_factor': 0.1,
+        'grapheme_weight': 2,
+        'vowel_weight': 1,
+        'consonant_weight': 1,
         'ohem_rate': 0.8
     }),
     'optimizer': ('Over9000', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
@@ -92,7 +91,7 @@ def train_fold(save_dir, train_folds, val_folds):
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=30),
             ReduceLROnPlateau(monitor='val_hierarchical_recall',
-                              factor=0.8, patience=3, threshold=1e-7),
+                              factor=0.64, patience=7, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
