@@ -50,7 +50,7 @@ PARAMS = {
         'grapheme_weight': 2,
         'vowel_weight': 1,
         'consonant_weight': 1,
-        'ohem_rate': 0.8
+        'ohem_rate': (0.02, 0.82)
     }),
     'optimizer': ('Over9000', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0]

@@ -4,18 +4,19 @@ import torch.nn.functional as F
 
 
 class SoftTargetCrossEntropy(nn.Module):
-    def __init__(self, ohem_rate=1.0):
+    def __init__(self, ohem_rate=(0.0, 1.0)):
         super(SoftTargetCrossEntropy, self).__init__()
         self.ohem_rate = ohem_rate
 
     def forward(self, x, target, training=False):
         loss = torch.sum(-target * F.log_softmax(x, dim=-1), dim=-1)
 
-        if training and self.ohem_rate < 1.0:
+        if training and self.ohem_rate != (0.0, 1.0):
             _, idx = torch.sort(loss, descending=True)
-            keep_num = int(x.size(0) * self.ohem_rate)
-            if keep_num < x.size(0):
-                keep_idx = idx[:keep_num]
+            keep_start = int(x.size(0) * self.ohem_rate[0])
+            keep_end = int(x.size(0) * self.ohem_rate[1])
+            if x.size(0) > keep_end != keep_start:
+                keep_idx = idx[keep_start:keep_end]
                 loss = loss[keep_idx]
 
         return loss.mean()
@@ -26,7 +27,7 @@ class BengaliAiCrossEntropy(nn.Module):
                  grapheme_weight=2.0,
                  vowel_weight=1.0,
                  consonant_weight=1.0,
-                 ohem_rate=1.0):
+                 ohem_rate=(0.0, 1.0)):
         super(BengaliAiCrossEntropy, self).__init__()
 
         self.grapheme_weight = grapheme_weight
