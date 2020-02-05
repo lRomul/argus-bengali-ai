@@ -31,8 +31,8 @@ TRAIN_EPOCHS = [40, 40, 120]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
-MIX_PROB = 0.0
-AUTO_AUGMENT = 'rand-m5-mstd0.5-inc1'
+MIX_PROB = 1.0
+AUTO_AUGMENT = 'augmix-m2-w2'
 DEVICES = ['cuda']
 
 
