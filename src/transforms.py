@@ -204,14 +204,14 @@ class Albumentations:
                         scale_limit=0.25,
                         rotate_limit=15,
                         border_mode=cv2.BORDER_CONSTANT,
-                        p=0.2
+                        p=0.0
                     ),
                     alb.OneOf([
                         alb.GridDistortion(p=1.0,
                                            border_mode=cv2.BORDER_CONSTANT,
                                            distort_limit=0.25,
                                            num_steps=10)
-                    ], p=0.2),
+                    ], p=0.0),
                 ], p=p)
 
     def __call__(self, image):
@@ -237,14 +237,7 @@ def get_transforms(train, size):
 
     if train:
         transforms = Compose([
-            UseWithProb(OneOf([
-                Erosion(),
-                Dilation(),
-                Opening(),
-                Closing()
-            ]), prob=0.2),
             resize,
-            Albumentations(),
             ImageToTensor()
         ])
     else:
