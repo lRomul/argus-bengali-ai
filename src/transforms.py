@@ -7,8 +7,6 @@ import albumentations as alb
 from albumentations.core.transforms_interface import DualTransform
 from albumentations.augmentations import functional as F
 
-from src import config
-
 
 class Compose:
     def __init__(self, transforms):
@@ -64,43 +62,40 @@ class ImageToTensor:
         return image
 
 
-def bbox(img):
-    rows = np.any(img, axis=1)
-    cols = np.any(img, axis=0)
-    rmin, rmax = np.where(rows)[0][[0, -1]]
-    cmin, cmax = np.where(cols)[0][[0, -1]]
-    return rmin, rmax, cmin, cmax
+def get_random_kernel():
+    structure = np.random.choice([
+        cv2.MORPH_RECT,
+        cv2.MORPH_ELLIPSE,
+        cv2.MORPH_CROSS]
+    )
+    ksize = tuple(np.random.randint(1, 6, 2))
+    kernel = cv2.getStructuringElement(structure, ksize)
+    return kernel
 
 
-def crop_resize(image, size, pad=16,
-                height=config.raw_image_shape[0],
-                width=config.raw_image_shape[1]):
-    # crop a box around pixels large than the threshold
-    # some images contain line at the sides
-    ymin, ymax, xmin, xmax = bbox(image[5:-5, 5:-5] > 80)
-    # cropping may cut too much, so we need to add it back
-    xmin = xmin - 13 if (xmin > 13) else 0
-    ymin = ymin - 10 if (ymin > 10) else 0
-    xmax = xmax + 13 if (xmax < width - 13) else width
-    ymax = ymax + 10 if (ymax < height - 10) else height
-    img = image[ymin:ymax, xmin:xmax]
-    # remove lo intensity pixels as noise
-    img[img < 28] = 0
-    lx, ly = xmax - xmin, ymax - ymin
-    l = max(lx, ly) + pad
-    # make sure that the aspect ratio is kept in rescaling
-    img = np.pad(img, [((l - ly) // 2,), ((l - lx) // 2,)], mode='constant')
-    return cv2.resize(img, (size, size))
-
-
-class IafossCrop:
-    def __init__(self, size, pad=16):
-        self.size = size
-        self.pad = pad
-
+class Erosion:
     def __call__(self, image):
-        # Source: https://www.kaggle.com/iafoss/image-preprocessing-128x128
-        image = crop_resize(image, size=self.size, pad=self.pad)
+        image = cv2.erode(image, get_random_kernel(), iterations=1)
+        return image
+
+
+class Dilation:
+    def __call__(self, image):
+        image = cv2.dilate(image, get_random_kernel(), iterations=1)
+        return image
+
+
+class Opening:
+    def __call__(self, image):
+        image = cv2.erode(image, get_random_kernel(), iterations=1)
+        image = cv2.dilate(image, get_random_kernel(), iterations=1)
+        return image
+
+
+class Closing:
+    def __call__(self, image):
+        image = cv2.dilate(image, get_random_kernel(), iterations=1)
+        image = cv2.erode(image, get_random_kernel(), iterations=1)
         return image
 
 
@@ -209,18 +204,14 @@ class Albumentations:
                         scale_limit=0.25,
                         rotate_limit=15,
                         border_mode=cv2.BORDER_CONSTANT,
-                        p=0.5
+                        p=0.2
                     ),
                     alb.OneOf([
                         alb.GridDistortion(p=1.0,
                                            border_mode=cv2.BORDER_CONSTANT,
                                            distort_limit=0.25,
                                            num_steps=10)
-                    ], p=0.5),
-                    # alb.OneOf([
-                    #     GridMask(num_grid=(3, 5), mode=0),
-                    #     GridMask(num_grid=(3, 5), mode=2),
-                    # ], p=0.7)
+                    ], p=0.2),
                 ], p=p)
 
     def __call__(self, image):
@@ -246,6 +237,12 @@ def get_transforms(train, size):
 
     if train:
         transforms = Compose([
+            UseWithProb(OneOf([
+                Erosion(),
+                Dilation(),
+                Opening(),
+                Closing()
+            ]), prob=0.2),
             resize,
             Albumentations(),
             ImageToTensor()

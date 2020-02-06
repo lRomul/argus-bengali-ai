@@ -1,4 +1,7 @@
+import numpy as np
 import pandas as pd
+import random
+import time
 import gc
 
 import torch
@@ -103,7 +106,14 @@ class BengaliAiDataset(Dataset):
 
         return image, target
 
+    def _set_random_seed(self, idx):
+        seed = int(time.time() * 1000.0) + idx
+        random.seed(seed)
+        np.random.seed(seed % (2**32 - 1))
+
     def __getitem__(self, idx):
+        self._set_random_seed(idx)
+
         if not self.target:
             image = self.get_sample(idx)
             return image
