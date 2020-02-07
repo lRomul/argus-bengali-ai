@@ -17,6 +17,7 @@ EXPERIMENT_DIR = config.experiments_dir / args.experiment
 PREDICTION_DIR = config.predictions_dir / args.experiment
 DEVICE = 'cuda'
 BATCH_SIZE = 256
+IMAGE_SIZE = 224
 
 
 def predict_test(test_data, predictor, fold, batch_num):
@@ -82,7 +83,7 @@ def blend_test_predictions():
 
 
 if __name__ == "__main__":
-    transforms = get_transforms(train=False)
+    transforms = get_transforms(train=False, size=IMAGE_SIZE)
     test_data_generator = get_test_data_generator(batch=2)
 
     for batch_num, test_data in enumerate(test_data_generator):
