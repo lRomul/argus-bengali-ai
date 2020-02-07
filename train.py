@@ -90,9 +90,9 @@ def train_fold(save_dir, train_folds, val_folds):
 
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
-            EarlyStopping(monitor='val_hierarchical_recall', patience=30),
+            EarlyStopping(monitor='val_hierarchical_recall', patience=20),
             ReduceLROnPlateau(monitor='val_hierarchical_recall',
-                              factor=0.64, patience=7, threshold=1e-7),
+                              factor=0.64, patience=5, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
