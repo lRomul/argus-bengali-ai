@@ -26,7 +26,7 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [512, 256, 176]
+BATCH_SIZE = [384, 192, 132]
 TRAIN_EPOCHS = [40, 40, 120]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -44,7 +44,7 @@ PARAMS = {
     'nn_module': ('CustomResnet', {
         'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'classifier': ('fc', {'pooler': 'avgpool'})
+        'classifier': ('conv', {'pooler': 'gem', 'ratio': 4})
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
