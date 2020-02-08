@@ -26,7 +26,7 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [384, 192, 132]
+BATCH_SIZE = [512, 256, 176]
 TRAIN_EPOCHS = [40, 40, 120]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -44,14 +44,14 @@ PARAMS = {
     'nn_module': ('CustomResnet', {
         'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'classifier': ('conv', {'pooler': 'gem', 'ratio': 4})
+        'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
-        'smooth_factor': 0.1,
-        'ohem_rate': 0.8
+        'smooth_factor': 0.0,
+        'ohem_rate': 1.0
     }),
     'optimizer': ('Over9000', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0]
@@ -90,9 +90,9 @@ def train_fold(save_dir, train_folds, val_folds):
 
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
-            EarlyStopping(monitor='val_hierarchical_recall', patience=20),
+            EarlyStopping(monitor='val_hierarchical_recall', patience=30),
             ReduceLROnPlateau(monitor='val_hierarchical_recall',
-                              factor=0.64, patience=5, threshold=1e-7),
+                              factor=0.64, patience=7, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
