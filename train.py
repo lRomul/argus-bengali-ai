@@ -12,9 +12,9 @@ from argus.callbacks import (
 
 from torch.utils.data import DataLoader
 
-from src.datasets import BengaliAiDataset, get_folds_data
+from src.datasets import BengaliAiDataset, AugMixDataset, get_folds_data, augmix_collate
 from src.argus_models import BengaliAiModel
-from src.transforms import get_transforms
+from src.transforms import get_transforms, get_auto_augment
 from src.mixers import UseMixerWithProb, CutMix
 from src.utils import initialize_amp
 from src import config
@@ -26,12 +26,15 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [512, 256, 176]
+BATCH_SIZE = [170, 85, 58]
+
 TRAIN_EPOCHS = [40, 40, 120]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
 MIX_PROB = 1.0
+AUTO_AUGMENT = 'augmix-m3-w3'
+NUM_AUG_SPLITS = 3
 DEVICES = ['cuda']
 
 
@@ -47,11 +50,19 @@ PARAMS = {
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 9.032258064516129 * 2,
-        'vowel_weight': 0.5913978494623656,
-        'consonant_weight': 0.3763440860215054,
+        'grapheme_weight': 9.032 * 2,
+        'vowel_weight': 0.591,
+        'consonant_weight': 0.376,
         'smooth_factor': 0.1,
-        'ohem_rate': 0.8
+        'ohem_rate': 0.8,
+        'jsd': {
+            'num_splits': NUM_AUG_SPLITS,
+            'alpha': {
+                'grapheme': 1,
+                'vowel': 1,
+                'consonant': 1
+            }
+        }
     }),
     'optimizer': ('Over9000', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0]
@@ -77,14 +88,18 @@ def train_fold(save_dir, train_folds, val_folds):
         mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
         test_transform = get_transforms(train=False, size=image_size)
 
-        train_dataset = BengaliAiDataset(folds_data, train_folds,
-                                         transform=train_transform,
-                                         mixer=mixer)
+        auto_augment = get_auto_augment(image_size, auto_augment=AUTO_AUGMENT)
+        train_dataset = AugMixDataset(folds_data, train_folds,
+                                      transform=train_transform,
+                                      mixer=mixer,
+                                      num_splits=NUM_AUG_SPLITS,
+                                      auto_augment=auto_augment)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
                                   shuffle=True, drop_last=True,
-                                  num_workers=NUM_WORKERS)
+                                  num_workers=NUM_WORKERS,
+                                  collate_fn=augmix_collate)
         val_loader = DataLoader(val_dataset, batch_size=batch_size * 2,
                                 shuffle=False, num_workers=NUM_WORKERS)
 

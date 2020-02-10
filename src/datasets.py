@@ -122,3 +122,53 @@ class BengaliAiDataset(Dataset):
             if self.mixer is not None:
                 image, target = self.mixer(self, image, target)
             return image, target
+
+
+def augmix_collate(batch):
+    """ A fast collation function optimized for uint8 images (np array or torch) and int64 targets (labels)"""
+    assert isinstance(batch[0], tuple)
+    assert isinstance(batch[0][0], tuple)
+    batch_size = len(batch)
+    # This branch 'deinterleaves' and flattens tuples of input tensors into one tensor ordered by position
+    # such that all tuple of position n will end up in a torch.split(tensor, batch_size) in nth position
+    inner_tuple_size = len(batch[0][0])
+    flattened_batch_size = batch_size * inner_tuple_size
+    targets0 = torch.zeros((flattened_batch_size, *batch[0][1][0].shape), dtype=torch.float32)
+    targets1 = torch.zeros((flattened_batch_size, *batch[0][1][1].shape), dtype=torch.float32)
+    targets2 = torch.zeros((flattened_batch_size, *batch[0][1][2].shape), dtype=torch.float32)
+    tensor = torch.zeros((flattened_batch_size, *batch[0][0][0].shape), dtype=torch.float32)
+    for i in range(batch_size):
+        assert len(batch[i][0]) == inner_tuple_size  # all input tensor tuples must be same length
+        for j in range(inner_tuple_size):
+            targets0[i + j * batch_size] += batch[i][1][0]
+            targets1[i + j * batch_size] += batch[i][1][1]
+            targets2[i + j * batch_size] += batch[i][1][2]
+            tensor[i + j * batch_size] += batch[i][0][j]
+    return tensor, (targets0, targets1, targets2)
+
+
+class AugMixDataset(BengaliAiDataset):
+    def __init__(self,
+                 data,
+                 folds=None,
+                 transform=None,
+                 mixer=None,
+                 num_splits=3,
+                 auto_augment=None):
+        super().__init__(data, folds=folds, target=True,
+                         transform=transform, mixer=mixer)
+        self.num_splits = num_splits
+        self.auto_augment = auto_augment
+
+    def __getitem__(self, idx):
+        self._set_random_seed(idx)
+
+        image, target = self.get_sample(idx)
+        if self.mixer is not None:
+            image, target = self.mixer(self, image, target)
+
+        images = [image]
+        for _ in range(self.num_splits - 1):
+            images.append(self.auto_augment(image))
+
+        return tuple(images), target

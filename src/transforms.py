@@ -2,10 +2,19 @@ import cv2
 import torch
 import random
 import numpy as np
+from PIL import Image
+
+from torchvision import transforms
 
 import albumentations as alb
 from albumentations.core.transforms_interface import DualTransform
 from albumentations.augmentations import functional as F
+
+from timm.data.auto_augment import (
+    rand_augment_transform,
+    augment_and_mix_transform,
+    auto_augment_transform
+)
 
 
 class Compose:
@@ -246,3 +255,43 @@ def get_transforms(train, size):
             ImageToTensor()
         ])
     return transforms
+
+
+class PILImageFromTensor:
+    def __call__(self, tensor):
+        tensor = (tensor * 255).to(torch.uint8)
+        image = tensor.cpu().numpy()
+        image = np.transpose(image, (1, 2, 0))
+        image = Image.fromarray(image)
+        return image
+
+
+class TensorFromPILImage:
+    def __call__(self, image):
+        image = np.array(image)
+        image = np.transpose(image, (2, 0, 1))
+        image = image.astype(np.float32) / 255.0
+        image = torch.from_numpy(image)
+        return image
+
+
+def get_auto_augment(size, auto_augment='augmix-m3-w3'):
+    mean = (0.485, 0.456, 0.406)
+    aa_params = dict(
+        translate_const=int(size * 0.45),
+        img_mean=tuple([min(255, round(255 * x)) for x in mean]),
+    )
+
+    aa_trns = [PILImageFromTensor()]
+
+    if auto_augment.startswith('rand'):
+        aa_trns += [rand_augment_transform(auto_augment, aa_params)]
+    elif auto_augment.startswith('augmix'):
+        aa_params['translate_pct'] = 0.3
+        aa_trns += [augment_and_mix_transform(auto_augment, aa_params)]
+    else:
+        aa_trns += [auto_augment_transform(auto_augment, aa_params)]
+
+    aa_trns += [TensorFromPILImage()]
+
+    return transforms.Compose(aa_trns)
