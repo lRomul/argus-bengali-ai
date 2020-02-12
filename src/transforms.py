@@ -237,6 +237,12 @@ def get_transforms(train, size):
 
     if train:
         transforms = Compose([
+            UseWithProb(OneOf([
+                Erosion(),
+                Dilation(),
+                Opening(),
+                Closing()
+            ]), prob=0.1),
             resize,
             ImageToTensor()
         ])
