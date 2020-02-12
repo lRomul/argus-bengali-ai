@@ -212,7 +212,7 @@ class Albumentations:
                                            distort_limit=0.25,
                                            num_steps=10)
                     ], p=0.0),
-                    GridMask(num_grid=(3, 7), mode=0, p=0.1),
+                    GridMask(num_grid=(3, 7), mode=0, p=0.2),
                 ], p=p)
 
     def __call__(self, image):
