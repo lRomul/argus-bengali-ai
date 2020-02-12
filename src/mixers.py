@@ -15,6 +15,9 @@ def rand_bbox(size, lam):
     elif len(size) == 3:
         W = size[1]
         H = size[2]
+    elif len(size) == 2:
+        W = size[0]
+        H = size[1]
     else:
         raise Exception
 
@@ -73,10 +76,13 @@ class CutMix:
             lam = np.random.beta(self.beta, self.beta)
             rnd_image, rnd_target = get_random_sample(dataset)
 
-            bbx1, bby1, bbx2, bby2 = rand_bbox(image.size(), lam)
-            image[:, bbx1:bbx2, bby1:bby2] = rnd_image[:, bbx1:bbx2, bby1:bby2]
+            bbx1, bby1, bbx2, bby2 = rand_bbox(image.shape, lam)
+            if len(image.shape) == 2:
+                image[bbx1:bbx2, bby1:bby2] = rnd_image[bbx1:bbx2, bby1:bby2]
+            else:
+                image[:, bbx1:bbx2, bby1:bby2] = rnd_image[:, bbx1:bbx2, bby1:bby2]
             lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1)
-                       / (image.size()[-1] * image.size()[-2]))
+                       / (image.shape[-1] * image.shape[-2]))
 
             new_target = []
             for trg, rnd_trg in zip(target, rnd_target):
