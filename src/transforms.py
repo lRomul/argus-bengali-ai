@@ -201,10 +201,10 @@ class Albumentations:
         self.augmentation = alb.Compose([
                     alb.ShiftScaleRotate(
                         shift_limit=0.05,
-                        scale_limit=0.25,
-                        rotate_limit=15,
+                        scale_limit=0.05,
+                        rotate_limit=5,
                         border_mode=cv2.BORDER_CONSTANT,
-                        p=0.0
+                        p=0.2
                     ),
                     alb.OneOf([
                         alb.GridDistortion(p=1.0,
@@ -237,13 +237,8 @@ def get_transforms(train, size):
 
     if train:
         transforms = Compose([
-            UseWithProb(OneOf([
-                Erosion(),
-                Dilation(),
-                Opening(),
-                Closing()
-            ]), prob=0.1),
             resize,
+            Albumentations(),
             ImageToTensor()
         ])
     else:
