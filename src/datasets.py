@@ -73,11 +73,13 @@ class BengaliAiDataset(Dataset):
                  folds=None,
                  target=True,
                  transform=None,
-                 mixer=None):
+                 mixer=None,
+                 mixer_first=True):
         self.folds = folds
         self.target = target
         self.transform = transform
         self.mixer = mixer
+        self.mixer_first = mixer_first
         if folds is None:
             self.data = data
         else:
@@ -90,6 +92,10 @@ class BengaliAiDataset(Dataset):
         sample = self.data[idx]
 
         image = sample['image']
+
+        if not self.mixer_first:
+            if self.transform is not None:
+                image = self.transform(image)
 
         if not self.target:
             return image
@@ -119,6 +125,7 @@ class BengaliAiDataset(Dataset):
             image, target = self.get_sample(idx)
             if self.mixer is not None:
                 image, target = self.mixer(self, image, target)
-            if self.transform is not None:
-                image = self.transform(image)
+            if self.mixer_first:
+                if self.transform is not None:
+                    image = self.transform(image)
             return image, target

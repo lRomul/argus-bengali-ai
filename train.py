@@ -32,6 +32,7 @@ BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
 MIX_PROB = 1.0
+MIXER_FIRST = False
 DEVICES = ['cuda']
 
 
@@ -79,7 +80,8 @@ def train_fold(save_dir, train_folds, val_folds):
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
                                          transform=train_transform,
-                                         mixer=mixer)
+                                         mixer=mixer,
+                                         mixer_first=MIXER_FIRST)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
