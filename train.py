@@ -53,7 +53,7 @@ PARAMS = {
         'smooth_factor': 0.1,
         'ohem_rate': 0.8
     }),
-    'optimizer': ('Over9000', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
+    'optimizer': ('AdamW', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0]
 }
 
