@@ -199,20 +199,7 @@ class GridMask(DualTransform):
 class Albumentations:
     def __init__(self, p=1.0):
         self.augmentation = alb.Compose([
-                    alb.ShiftScaleRotate(
-                        shift_limit=0.05,
-                        scale_limit=0.05,
-                        rotate_limit=5,
-                        border_mode=cv2.BORDER_CONSTANT,
-                        p=0.0
-                    ),
-                    alb.OneOf([
-                        alb.GridDistortion(p=1.0,
-                                           border_mode=cv2.BORDER_CONSTANT,
-                                           distort_limit=0.25,
-                                           num_steps=10)
-                    ], p=0.0),
-                    GridMask(num_grid=(3, 7), mode=0, p=0.4),
+                    GridMask(num_grid=(3, 7), mode=0, p=0.5),
                 ], p=p)
 
     def __call__(self, image):
