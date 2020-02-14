@@ -28,25 +28,34 @@ class SoftBCELoss(nn.Module):
         return loss.mean()
 
 
+def lsep_loss(input, target, average=True):
+
+    differences = input.unsqueeze(1) - input.unsqueeze(2)
+    where_different = (target.unsqueeze(1) < target.unsqueeze(2)).float()
+
+    exps = differences.exp() * where_different
+    lsep = torch.log(1 + exps.sum(2).sum(1))
+
+    if average:
+        return lsep.mean()
+    else:
+        return lsep
+
+
 class BengaliAiCrossEntropy(nn.Module):
     def __init__(self,
                  grapheme_weight=2.0,
                  vowel_weight=1.0,
-                 consonant_weight=1.0,
-                 smooth_factor=0,
-                 ohem_rate=1.0):
+                 consonant_weight=1.0):
         super(BengaliAiCrossEntropy, self).__init__()
 
         self.grapheme_weight = grapheme_weight
         self.vowel_weight = vowel_weight
         self.consonant_weight = consonant_weight
-        self.smooth_factor = smooth_factor
-        self.ohem_rate = ohem_rate
 
-        loss = SoftBCELoss(smooth_factor=smooth_factor, ohem_rate=ohem_rate)
-        self.grapheme_ce = loss
-        self.vowel_ce = loss
-        self.consonant_ce = loss
+        self.grapheme_ce = lsep_loss
+        self.vowel_ce = lsep_loss
+        self.consonant_ce = lsep_loss
 
     def __call__(self, pred, target, training=False):
         grapheme_pred, vowel_pred, consonant_pred = pred
@@ -55,17 +64,14 @@ class BengaliAiCrossEntropy(nn.Module):
         loss = 0
         if self.grapheme_weight:
             loss += self.grapheme_weight \
-                    * self.grapheme_ce(grapheme_pred, grapheme_target,
-                                       training=training)
+                    * self.grapheme_ce(grapheme_pred, grapheme_target)
 
         if self.vowel_weight:
             loss += self.vowel_weight \
-                    * self.vowel_ce(vowel_pred, vowel_target,
-                                    training=training)
+                    * self.vowel_ce(vowel_pred, vowel_target)
 
         if self.consonant_weight:
             loss += self.consonant_weight \
-                    * self.consonant_ce(consonant_pred, consonant_target,
-                                        training=training)
+                    * self.consonant_ce(consonant_pred, consonant_target)
 
         return loss
