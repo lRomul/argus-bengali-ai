@@ -199,7 +199,7 @@ class GridMask(DualTransform):
 class Albumentations:
     def __init__(self, p=1.0):
         self.augmentation = alb.Compose([
-                    GridMask(num_grid=(3, 7), mode=0, p=0.5),
+                    GridMask(num_grid=(3, 7), mode=0, p=0.3),
                 ], p=p)
 
     def __call__(self, image):
