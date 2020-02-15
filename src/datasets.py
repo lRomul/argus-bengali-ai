@@ -89,7 +89,7 @@ class BengaliAiDataset(Dataset):
     def get_sample(self, idx):
         sample = self.data[idx]
 
-        image = sample['image']
+        image = sample['image'].copy()
 
         if not self.target:
             return image
