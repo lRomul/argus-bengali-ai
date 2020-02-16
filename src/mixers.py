@@ -1,6 +1,8 @@
 import random
 import numpy as np
 
+from src.transforms import GridMask
+
 
 def get_random_sample(dataset):
     rnd_idx = random.randint(0, len(dataset) - 1)
@@ -129,6 +131,51 @@ class CutMixPixelSum:
                 trg = trg * lam + rnd_trg * (1 - lam)
                 new_target.append(trg)
             target = new_target
+
+        return image, target
+
+
+class GridMix:
+    def __init__(self, num_grid=(3, 7), mode=2, lam=0.5):
+        self.num_grid = num_grid
+        self.mode = mode
+        self.grid_mask = GridMask(num_grid=num_grid, mode=mode, p=1.0)
+        self.lam = lam
+        self.size = None
+
+    def init_masks(self, size):
+        if size != self.size:
+            self.grid_mask.init_masks(*size)
+            self.masks = self.grid_mask.masks
+            self.rand_h_max = self.grid_mask.rand_h_max
+            self.rand_w_max = self.grid_mask.rand_w_max
+            self.size = size
+
+    def __call__(self, dataset, image, target):
+        rnd_image, rnd_target = get_random_sample(dataset)
+
+        h, w = image.shape[:2]
+        self.init_masks((h, w))
+
+        mid = np.random.randint(len(self.masks))
+        mask = self.masks[mid]
+        rand_h = np.random.randint(self.rand_h_max[mid])
+        rand_w = np.random.randint(self.rand_w_max[mid])
+
+        mask = mask[:, :, np.newaxis] if image.ndim == 3 else mask
+        mask = mask[rand_h:rand_h + h, rand_w:rand_w + w]
+
+        image *= mask.astype(image.dtype)
+
+        rnd_mask = np.logical_not(mask)
+        image += rnd_mask.astype(image.dtype) * rnd_image
+
+        new_target = []
+        for trg, rnd_trg in zip(target, rnd_target):
+            trg = trg * self.lam + rnd_trg * self.lam
+            trg = np.clip(trg, 0.0, 1.0)
+            new_target.append(trg)
+        target = new_target
 
         return image, target
 
