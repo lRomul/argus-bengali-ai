@@ -75,8 +75,8 @@ def train_fold(save_dir, train_folds, val_folds):
         train_transform = get_transforms(train=True, size=image_size)
         mixer = RandomMixer([
             CutMix(num_mix=1, beta=1.0, prob=1.0),
-            GridMix(num_grid=(1, 3), mode=2, lam=0.5)
-        ], p=[0.8, 0.2])
+            GridMix(num_grid=(2, 3), mode=2, lam=0.75)
+        ], p=[0.8, 0.1])
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
