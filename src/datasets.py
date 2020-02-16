@@ -114,6 +114,8 @@ class BengaliAiDataset(Dataset):
 
         if not self.target:
             image = self.get_sample(idx)
+            if self.transform is not None:
+                image = self.transform(image)
             return image
         else:
             image, target = self.get_sample(idx)
