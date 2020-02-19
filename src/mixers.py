@@ -38,15 +38,13 @@ def rand_bbox(size, lam):
 
 
 class MixUp:
-    def __init__(self, alpha_dist='beta'):
-        assert alpha_dist in ['uniform', 'beta']
-        self.alpha_dist = alpha_dist
+    def __init__(self, lam=0.4):
+        self.lam = lam
 
     def sample_alpha(self):
-        if self.alpha_dist == 'uniform':
-            return random.uniform(0, 0.5)
-        elif self.alpha_dist == 'beta':
-            return np.random.beta(0.4, 0.4)
+        alpha = np.random.beta(self.lam, self.lam)
+        alpha = 0.5 - abs(alpha - 0.5)
+        return alpha
 
     def __call__(self, dataset, image, target):
         rnd_image, rnd_target = get_random_sample(dataset)
@@ -141,6 +139,16 @@ class RandomMixer:
     def __call__(self, dataset, image, target):
         mixer = np.random.choice(self.mixers, p=self.p)
         image, target = mixer(dataset, image, target)
+        return image, target
+
+
+class ComposeMixer:
+    def __init__(self, mixers):
+        self.mixers = mixers
+
+    def __call__(self, dataset, image, target):
+        for mixer in self.mixers:
+            image, target = mixer(dataset, image, target)
         return image, target
 
 
