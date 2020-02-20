@@ -62,40 +62,25 @@ class ImageToTensor:
         return image
 
 
-def get_random_kernel():
-    structure = np.random.choice([
-        cv2.MORPH_RECT,
-        cv2.MORPH_ELLIPSE,
-        cv2.MORPH_CROSS]
-    )
-    ksize = tuple(np.random.randint(1, 6, 2))
-    kernel = cv2.getStructuringElement(structure, ksize)
-    return kernel
+class RandomMorphological(alb.ImageOnlyTransform):
+    def __init__(self, min_size=2, max_size=6, element_shape=cv2.MORPH_ELLIPSE,
+                 always_apply=False, p=0.5):
+        super().__init__(always_apply, p)
+        self.min_size = min_size
+        self.max_size = max_size
+        self.element_shape = element_shape
 
+    def apply(self, image, **params):
+        arr = np.random.randint(self.min_size, self.max_size, 2)
+        kernel = cv2.getStructuringElement(self.element_shape, tuple(arr))
 
-class Erosion:
-    def __call__(self, image):
-        image = cv2.erode(image, get_random_kernel(), iterations=1)
-        return image
+        if random.random() > 0.5:
+            # make it thinner
+            image = cv2.erode(image, kernel, iterations=1)
+        else:
+            # make it thicker
+            image = cv2.dilate(image, kernel, iterations=1)
 
-
-class Dilation:
-    def __call__(self, image):
-        image = cv2.dilate(image, get_random_kernel(), iterations=1)
-        return image
-
-
-class Opening:
-    def __call__(self, image):
-        image = cv2.erode(image, get_random_kernel(), iterations=1)
-        image = cv2.dilate(image, get_random_kernel(), iterations=1)
-        return image
-
-
-class Closing:
-    def __call__(self, image):
-        image = cv2.dilate(image, get_random_kernel(), iterations=1)
-        image = cv2.erode(image, get_random_kernel(), iterations=1)
         return image
 
 
@@ -199,6 +184,8 @@ class GridMask(DualTransform):
 class Albumentations:
     def __init__(self, p=1.0):
         self.augmentation = alb.Compose([
+                    RandomMorphological(min_size=2, max_size=6,
+                                        element_shape=cv2.MORPH_ELLIPSE, p=0.5),
                     GridMask(num_grid=(3, 7), mode=0, p=0.5),
                 ], p=p)
 
