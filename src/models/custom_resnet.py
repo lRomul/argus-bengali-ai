@@ -12,6 +12,7 @@ from timm import create_model
 from src.models.resnext_wsl import resnext101_32x8d_wsl
 
 from src.models.classifiers import Classifier, ConvClassifier
+from src.models.cbam import CBAM
 
 
 ENCODERS = {
@@ -33,7 +34,8 @@ class CustomResnet(nn.Module):
     def __init__(self,
                  encoder="resnet34",
                  pretrained=True,
-                 classifier=None):
+                 classifier=None,
+                 cbam=None):
         super().__init__()
         if classifier is None:
             classifier = 'fc', {'pooler': 'avgpool'}
@@ -56,6 +58,16 @@ class CustomResnet(nn.Module):
         self.layer2 = resnet.layer2
         self.layer3 = resnet.layer3
         self.layer4 = resnet.layer4
+
+        if cbam is not None:
+            for layer in [self.layer2, self.layer3, self.layer4]:
+                for block in layer:
+                    block.se = CBAM(
+                        block.bn3.num_features,
+                        reduction_ratio=cbam['reduction_ratio'],
+                        pool_types=cbam['pool_types'],
+                        no_spatial=cbam['no_spatial']
+                    )
 
         if classifier[0] == 'fc':
             self.classifier = Classifier(num_bottleneck_filters, None,
