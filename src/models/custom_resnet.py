@@ -61,13 +61,13 @@ class CustomResnet(nn.Module):
 
         if cbam is not None:
             for layer in [self.layer2, self.layer3, self.layer4]:
-                block = layer[-1]
-                block.se = CBAM(
-                    block.bn3.num_features,
-                    reduction_ratio=cbam['reduction_ratio'],
-                    pool_types=cbam['pool_types'],
-                    no_spatial=cbam['no_spatial']
-                )
+                for block in layer:
+                    block.se = CBAM(
+                        block.bn3.num_features,
+                        reduction_ratio=cbam['reduction_ratio'],
+                        pool_types=cbam['pool_types'],
+                        no_spatial=cbam['no_spatial']
+                    )
 
         if classifier[0] == 'fc':
             self.classifier = Classifier(num_bottleneck_filters, None,
