@@ -60,7 +60,7 @@ class CustomResnet(nn.Module):
         self.layer4 = resnet.layer4
 
         if cbam is not None:
-            for layer in [self.layer2, self.layer3, self.layer4]:
+            for layer in [self.layer3, self.layer4]:
                 for block in layer:
                     block.se = CBAM(
                         block.bn3.num_features,
