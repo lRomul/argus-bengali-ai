@@ -27,14 +27,6 @@ class GeM(nn.Module):
                + ', ' + 'eps=' + str(self.eps) + ')'
 
 
-class Mish(nn.Module):
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        return x * torch.tanh(F.softplus(x))
-
-
 def get_pooler(pooler):
     if pooler == 'gem':
         return GeM(p=3, eps=1e-6)
@@ -71,7 +63,7 @@ class ConvBranch(nn.Module):
     def __init__(self, in_features, num_classes, pooler='avgpool', ratio=4):
         super().__init__()
         self.conv = nn.Sequential(
-            Mish(),
+            nn.ReLU(),
             nn.Conv2d(in_features, in_features // ratio,
                       3, 1, 1, bias=False),
             nn.BatchNorm2d(in_features // ratio)

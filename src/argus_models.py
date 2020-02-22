@@ -1,5 +1,7 @@
+import torch
+
 from argus import Model, optimizer
-from argus.utils import deep_detach
+from argus.utils import deep_detach, deep_to
 
 from src.models.cnn_finetune import get_cnn_finetune_model
 from src.models.custom_resnet import CustomResnet
@@ -26,13 +28,25 @@ class BengaliAiModel(Model):
     def __init__(self, params):
         super().__init__(params)
         self.amp = None
+        if 'aux' in params:
+            self.aux_weights = params['aux']['weights']
+        else:
+            self.aux_weights = None
 
     def train_step(self, batch, state) -> dict:
         self.train()
         self.optimizer.zero_grad()
         input, target = self.prepare_batch(batch, self.device)
         prediction = self.nn_module(input)
-        loss = self.loss(prediction, target, training=True)
+
+        if self.aux_weights is not None:
+            loss = 0
+            for pred, weight in zip(prediction, self.aux_weights):
+                loss += self.loss(pred, target, training=True) * weight
+            prediction = prediction[0]
+        else:
+            loss = self.loss(prediction, target, training=True)
+
         if self.amp is not None:
             with self.amp.scale_loss(loss, self.optimizer) as scaled_loss:
                 scaled_loss.backward()
@@ -48,3 +62,30 @@ class BengaliAiModel(Model):
             'target': target,
             'loss': loss.item()
         }
+
+    def val_step(self, batch, state) -> dict:
+        self.eval()
+        with torch.no_grad():
+            input, target = self.prepare_batch(batch, self.device)
+            prediction = self.nn_module(input)
+            if self.aux_weights is not None:
+                prediction = prediction[0]
+
+            loss = self.loss(prediction, target, training=False)
+            prediction = self.prediction_transform(prediction)
+            return {
+                'prediction': prediction,
+                'target': target,
+                'loss': loss.item()
+            }
+
+    def predict(self, input):
+        assert self.predict_ready()
+        with torch.no_grad():
+            self.eval()
+            input = deep_to(input, self.device)
+            prediction = self.nn_module(input)
+            if self.aux_weights is not None:
+                prediction = prediction[0]
+            prediction = self.prediction_transform(prediction)
+            return prediction

@@ -49,7 +49,8 @@ PARAMS = {
             'reduction_ratio': 16,
             'pool_types': ('avg', 'max'),
             'no_spatial': False
-        }
+        },
+        'aux': {}
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
@@ -59,7 +60,8 @@ PARAMS = {
         'ohem_rate': 0.8
     }),
     'optimizer': ('AdamW', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
-    'device': DEVICES[0]
+    'device': DEVICES[0],
+    'aux': {'weights': [1.0, 0.4, 0.2]}
 }
 
 

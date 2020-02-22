@@ -35,11 +35,9 @@ class CustomResnet(nn.Module):
                  encoder="resnet34",
                  pretrained=True,
                  classifier=None,
-                 cbam=None):
+                 cbam=None,
+                 aux=None):
         super().__init__()
-        if classifier is None:
-            classifier = 'fc', {'pooler': 'avgpool'}
-
         resnet, num_bottleneck_filters = ENCODERS[encoder]
         resnet = resnet(pretrained=pretrained)
 
@@ -69,23 +67,41 @@ class CustomResnet(nn.Module):
                     no_spatial=cbam['no_spatial']
                 )
 
+        self.aux2, self.aux3 = None, None
+        if aux is not None:
+            self.aux2 = self._make_classifier(self.layer2[-1].bn3.num_features, classifier)
+            self.aux3 = self._make_classifier(self.layer3[-1].bn3.num_features, classifier)
+
+        self.classifier = self._make_classifier(num_bottleneck_filters, classifier)
+
+    def _make_classifier(self, num_filters, classifier):
+        if classifier is None:
+            classifier = 'fc', {'pooler': 'avgpool'}
+
         if classifier[0] == 'fc':
-            self.classifier = Classifier(num_bottleneck_filters, None,
-                                         **classifier[1])
+            classifier = Classifier(num_filters, None, **classifier[1])
         elif classifier[0] == 'conv':
-            self.classifier = ConvClassifier(num_bottleneck_filters, None,
-                                             **classifier[1])
+            classifier = ConvClassifier(num_filters, None, **classifier[1])
         else:
             raise NotImplementedError
+
+        return classifier
 
     def forward(self, x):
         x = self.first_layers(x)
 
         x = self.layer1(x)
         x = self.layer2(x)
+        if self.aux2 is not None:
+            aux2 = self.aux2(x)
         x = self.layer3(x)
+        if self.aux3 is not None:
+            aux3 = self.aux3(x)
         x = self.layer4(x)
 
         x = self.classifier(x)
 
-        return x
+        if self.aux2 is None:
+            return x
+        else:
+            return x, aux3, aux2
