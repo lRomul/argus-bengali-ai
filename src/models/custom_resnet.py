@@ -59,15 +59,26 @@ class CustomResnet(nn.Module):
         self.layer3 = resnet.layer3
         self.layer4 = resnet.layer4
 
+        self.cbam2, self.cbam3, self.cbam4 = None, None, None
         if cbam is not None:
-            for layer in [self.layer2, self.layer3, self.layer4]:
-                for block in layer:
-                    block.se = CBAM(
-                        block.bn3.num_features,
-                        reduction_ratio=cbam['reduction_ratio'],
-                        pool_types=cbam['pool_types'],
-                        no_spatial=cbam['no_spatial']
-                    )
+            self.cbam2 = CBAM(
+                self.layer2[-1].bn3.num_features,
+                reduction_ratio=cbam['reduction_ratio'],
+                pool_types=cbam['pool_types'],
+                no_spatial=cbam['no_spatial']
+            )
+            self.cbam3 = CBAM(
+                self.layer3[-1].bn3.num_features,
+                reduction_ratio=cbam['reduction_ratio'],
+                pool_types=cbam['pool_types'],
+                no_spatial=cbam['no_spatial']
+            )
+            self.cbam4 = CBAM(
+                self.layer4[-1].bn3.num_features,
+                reduction_ratio=cbam['reduction_ratio'],
+                pool_types=cbam['pool_types'],
+                no_spatial=cbam['no_spatial']
+            )
 
         if classifier[0] == 'fc':
             self.classifier = Classifier(num_bottleneck_filters, None,
@@ -83,8 +94,14 @@ class CustomResnet(nn.Module):
 
         x = self.layer1(x)
         x = self.layer2(x)
+        if self.cbam2 is not None:
+            x = self.cbam2(x)
         x = self.layer3(x)
+        if self.cbam3 is not None:
+            x = self.cbam3(x)
         x = self.layer4(x)
+        if self.cbam4 is not None:
+            x = self.cbam4(x)
 
         x = self.classifier(x)
 
