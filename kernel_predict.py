@@ -36,6 +36,7 @@ def predict_test(test_data, predictor, experiment, fold, batch_num):
 
 def get_class_prediction_df(class_name):
     probs_df_lst = []
+    dtypes = {str(c): np.float32 for c in config.class_map[class_name].keys()}
     for experiment in EXPERIMENTS:
         for fold in config.folds:
             fold_prediction_dir = config.predictions_dir / experiment / f'fold_{fold}' / 'test'
@@ -46,10 +47,11 @@ def get_class_prediction_df(class_name):
 
             probs_batch_df_lst = []
             for fold_probs_path in fold_probs_paths:
-                probs_batch_df = pd.read_csv(fold_probs_path)
+                probs_batch_df = pd.read_csv(fold_probs_path, dtype=dtypes)
                 probs_batch_df_lst.append(probs_batch_df)
 
             probs_df = pd.concat(probs_batch_df_lst)
+            del probs_batch_df_lst
             probs_df.set_index('image_id', inplace=True)
             probs_df.sort_values("image_id", inplace=True)
             probs_df_lst.append(probs_df)
