@@ -29,4 +29,4 @@ run('pip install /kaggle/input/bengali-ai-deps/pytorch-image-models')
 
 run('python make_folds.py')
 run(f'python kernel_predict.py --experiment {EXPERIMENT_NAME}')
-run('rm -rf argus cnn_finetune pretrainedmodels src')
+run('rm -rf argus cnn_finetune pretrainedmodels src predictions')
