@@ -45,11 +45,7 @@ PARAMS = {
         'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
         'classifier': ('fc', {'pooler': 'avgpool'}),
-        'cbam': {
-            'reduction_ratio': 16,
-            'pool_types': ('avg', 'max'),
-            'no_spatial': False
-        },
+        'cbam': None,
         'aux': {}
     }),
     'loss': ('BengaliAiCrossEntropy', {
@@ -61,7 +57,7 @@ PARAMS = {
     }),
     'optimizer': ('AdamW', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0],
-    'aux': {'weights': [1.0, 0.4, 0.2]}
+    'aux': {'weights': [1.0, 0.2, 0.1]}
 }
 
 
@@ -99,7 +95,7 @@ def train_fold(save_dir, train_folds, val_folds):
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=30),
             ReduceLROnPlateau(monitor='val_hierarchical_recall',
-                              factor=0.64, patience=5, threshold=1e-7),
+                              factor=0.64, patience=7, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
