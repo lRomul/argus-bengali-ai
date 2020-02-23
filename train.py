@@ -26,7 +26,7 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [403, 201, 138]
+BATCH_SIZE = [380, 190, 130]
 TRAIN_EPOCHS = [40, 40, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
