@@ -26,7 +26,7 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [313, 156, 107]
+BATCH_SIZE = [403, 201, 138]
 TRAIN_EPOCHS = [40, 40, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -42,7 +42,7 @@ def get_lr(base_lr, batch_size):
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('CustomResnet', {
-        'encoder': 'skresnext50_32x4d',
+        'encoder': 'gluon_seresnext50_32x4d',
         'pretrained': True,
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
