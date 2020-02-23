@@ -42,7 +42,7 @@ RUN pip3 install --no-cache-dir \
     cnn-finetune==0.6.0 \
     albumentations==0.4.3
 
-RUN pip install timm==0.1.16
+RUN pip install timm==0.1.18
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
