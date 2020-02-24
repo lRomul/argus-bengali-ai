@@ -26,8 +26,8 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
-BATCH_SIZE = [380, 190, 130]
-TRAIN_EPOCHS = [40, 40, 240]
+BATCH_SIZE = [313, 156, 107]
+TRAIN_EPOCHS = [30, 30, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
@@ -42,7 +42,7 @@ def get_lr(base_lr, batch_size):
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('CustomResnet', {
-        'encoder': 'gluon_seresnext50_32x4d',
+        'encoder': 'skresnext50_32x4d',
         'pretrained': True,
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
@@ -92,7 +92,7 @@ def train_fold(save_dir, train_folds, val_folds):
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=30),
             ReduceLROnPlateau(monitor='val_hierarchical_recall',
-                              factor=0.64, patience=7, threshold=1e-7),
+                              factor=0.64, patience=6, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
 
