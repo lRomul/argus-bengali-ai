@@ -91,9 +91,11 @@ def train_fold(save_dir, train_folds, val_folds):
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=30),
-            MultiStepLR(milestones=range(15, 200, 15), gamma=0.64),
             LoggingToFile(save_dir / 'log.txt')
         ]
+
+        if image_size == IMAGE_SIZE[-1]:
+            callbacks += MultiStepLR(milestones=range(15, 200, 15), gamma=0.64)
 
         model.fit(train_loader,
                   val_loader=val_loader,
