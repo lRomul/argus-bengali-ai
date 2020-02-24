@@ -95,7 +95,7 @@ def train_fold(save_dir, train_folds, val_folds):
         ]
 
         if image_size == IMAGE_SIZE[-1]:
-            callbacks += MultiStepLR(milestones=range(15, 200, 15), gamma=0.64)
+            callbacks += MultiStepLR(milestones=range(20, 200, 20), gamma=0.64)
 
         model.fit(train_loader,
                   val_loader=val_loader,
