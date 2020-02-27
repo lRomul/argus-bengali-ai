@@ -7,7 +7,7 @@ from argus.callbacks import (
     MonitorCheckpoint,
     EarlyStopping,
     LoggingToFile,
-    ReduceLROnPlateau
+    MultiStepLR
 )
 
 from torch.utils.data import DataLoader
@@ -27,7 +27,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
 BATCH_SIZE = [448, 224, 154]
-TRAIN_EPOCHS = [40, 40, 240]
+TRAIN_EPOCHS = [40, 40, 200]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
@@ -91,10 +91,11 @@ def train_fold(save_dir, train_folds, val_folds):
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=30),
-            ReduceLROnPlateau(monitor='val_hierarchical_recall',
-                              factor=0.64, patience=7, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
+
+        if image_size == IMAGE_SIZE[-1]:
+            callbacks += [MultiStepLR(milestones=range(20, 200, 20), gamma=0.64)]
 
         model.fit(train_loader,
                   val_loader=val_loader,

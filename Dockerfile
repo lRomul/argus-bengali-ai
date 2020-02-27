@@ -41,8 +41,9 @@ RUN pip3 install --no-cache-dir \
     Pillow==6.2.2 \
     cnn-finetune==0.6.0 \
     albumentations==0.4.3 \
-    iterative-stratification==0.1.6 \
-    timm==0.1.16
+    iterative-stratification==0.1.6
+
+RUN pip install timm==0.1.18
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch

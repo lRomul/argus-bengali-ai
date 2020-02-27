@@ -26,6 +26,7 @@ ENCODERS = {
     "resnext101_32x8d_wsl": (resnext101_32x8d_wsl, 2048),
     "seresnext26t_32x4d": (partial(create_model, 'seresnext26t_32x4d'), 2048),
     "resnet50_jsd": (partial(create_model, 'resnet50'), 2048),
+    "skresnext50_32x4d": (partial(create_model, 'skresnext50_32x4d'), 2048)
 }
 
 
