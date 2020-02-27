@@ -8,7 +8,7 @@ from src import config
 
 
 if __name__ == '__main__':
-    random_state = 42
+    random_state = 666
 
     random.seed(random_state)
     np.random.seed(random_state)
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     train_df['fold'] = np.nan
 
-    mskf = MultilabelStratifiedKFold(n_splits=config.n_folds, random_state=random_state, shuffle=True)
+    mskf = MultilabelStratifiedKFold(n_splits=config.n_folds, random_state=random_state)
     for i, (_, test_index) in enumerate(mskf.split(X, y)):
         train_df.iloc[test_index, -1] = i
 
