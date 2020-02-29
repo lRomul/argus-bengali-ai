@@ -71,7 +71,7 @@ def train_fold(save_dir, train_folds, val_folds):
         print(f"Start train step: image_size {image_size}, batch_size {batch_size}, epochs {epochs}")
         model.set_lr(get_lr(BASE_LR, batch_size))
 
-        train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
+        train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.8)
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
