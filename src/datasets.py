@@ -109,6 +109,7 @@ class BengaliAiDataset(Dataset):
         random.seed(seed)
         np.random.seed(seed % (2**32 - 1))
 
+    @torch.no_grad()
     def __getitem__(self, idx):
         self._set_random_seed(idx)
 

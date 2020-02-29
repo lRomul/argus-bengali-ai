@@ -197,9 +197,9 @@ class GridMask(DualTransform):
 
 
 class Albumentations:
-    def __init__(self, p=1.0):
+    def __init__(self, p=1.0, gridmask_p=0.5):
         self.augmentation = alb.Compose([
-                    GridMask(num_grid=(3, 7), mode=0, p=0.5),
+                    GridMask(num_grid=(3, 7), mode=0, p=gridmask_p),
                 ], p=p)
 
     def __call__(self, image):
@@ -217,7 +217,7 @@ class Resize:
         return cv2.resize(image, self.size, interpolation=self.interpolation)
 
 
-def get_transforms(train, size):
+def get_transforms(train, size, gridmask_p=0.5):
     if size is None:
         resize = lambda x: x
     else:
@@ -226,7 +226,7 @@ def get_transforms(train, size):
     if train:
         transforms = Compose([
             resize,
-            Albumentations(),
+            Albumentations(gridmask_p=gridmask_p),
             ImageToTensor()
         ])
     else:
