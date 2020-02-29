@@ -33,7 +33,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
 BATCH_SIZE = [448, 224, 154]
-EKUSH_PROB = [0.5, 0.5, 0.5]
+EKUSH_PROB = [0.1, 0.1, 0.1]
 TRAIN_EPOCHS = [40, 40, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
