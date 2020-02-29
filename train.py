@@ -7,7 +7,7 @@ from argus.callbacks import (
     MonitorCheckpoint,
     EarlyStopping,
     LoggingToFile,
-    MultiStepLR
+    ReduceLROnPlateau
 )
 
 from torch.utils.data import DataLoader
@@ -15,7 +15,6 @@ from torch.utils.data import DataLoader
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
-from src.mixers import UseMixerWithProb, CutMix
 from src.utils import initialize_amp
 from src import config
 
@@ -27,11 +26,10 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
 BATCH_SIZE = [448, 224, 154]
-TRAIN_EPOCHS = [40, 40, 200]
+TRAIN_EPOCHS = [40, 40, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
-MIX_PROB = 1.0
 DEVICES = ['cuda']
 
 
@@ -73,13 +71,11 @@ def train_fold(save_dir, train_folds, val_folds):
         print(f"Start train step: image_size {image_size}, batch_size {batch_size}, epochs {epochs}")
         model.set_lr(get_lr(BASE_LR, batch_size))
 
-        train_transform = get_transforms(train=True, size=image_size)
-        mixer = UseMixerWithProb(CutMix(num_mix=1, beta=1.0, prob=1.0), MIX_PROB)
+        train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
-                                         transform=train_transform,
-                                         mixer=mixer)
+                                         transform=train_transform)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
@@ -91,11 +87,10 @@ def train_fold(save_dir, train_folds, val_folds):
         callbacks = [
             MonitorCheckpoint(save_dir, monitor='val_hierarchical_recall', max_saves=1),
             EarlyStopping(monitor='val_hierarchical_recall', patience=30),
+            ReduceLROnPlateau(monitor='val_hierarchical_recall',
+                              factor=0.64, patience=7, threshold=1e-7),
             LoggingToFile(save_dir / 'log.txt')
         ]
-
-        if image_size == IMAGE_SIZE[-1]:
-            callbacks += [MultiStepLR(milestones=range(20, 200, 20), gamma=0.64)]
 
         model.fit(train_loader,
                   val_loader=val_loader,
