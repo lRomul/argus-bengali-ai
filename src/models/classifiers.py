@@ -47,8 +47,9 @@ def get_pooler(pooler):
 
 
 class Classifier(nn.Module):
-    def __init__(self, in_features, num_classes, pooler='avgpool'):
+    def __init__(self, in_features, num_classes, pooler='avgpool', ekush=False):
         super().__init__()
+        self.ekush = ekush
         self.pooler = get_pooler(pooler)
         self.grapheme_root_fc = nn.Linear(in_features,
                                           config.n_grapheme_roots)
@@ -56,6 +57,9 @@ class Classifier(nn.Module):
                                             config.n_vowel_diacritics)
         self.consonant_diacritic_fc = nn.Linear(in_features,
                                                 config.n_consonant_diacritics)
+        if self.ekush:
+            self.ekush_fc = nn.Linear(in_features,
+                                      config.n_ekush_labels)
 
     def forward(self, x):
         x = self.pooler(x)
@@ -64,7 +68,13 @@ class Classifier(nn.Module):
         grapheme = self.grapheme_root_fc(x)
         vowel = self.vowel_diacritic_fc(x)
         consonant = self.consonant_diacritic_fc(x)
-        return grapheme, vowel, consonant
+
+        preds = [grapheme, vowel, consonant]
+        if self.ekush:
+            ekush = self.ekush_fc(x)
+            preds.append(ekush)
+
+        return tuple(preds)
 
 
 class ConvBranch(nn.Module):

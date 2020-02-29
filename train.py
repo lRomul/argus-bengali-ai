@@ -12,10 +12,16 @@ from argus.callbacks import (
 
 from torch.utils.data import DataLoader
 
-from src.datasets import BengaliAiDataset, get_folds_data
+from src.datasets import (
+    BengaliAiDataset,
+    get_folds_data,
+    EkushDataset,
+    get_ekush_data,
+    RandomDataset
+)
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
-from src.mixers import UseMixerWithProb, CutMix
+from src.mixers import CutMix
 from src.utils import initialize_amp
 from src import config
 
@@ -27,6 +33,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224]
 BATCH_SIZE = [448, 224, 154]
+EKUSH_PROB = [0.3, 0.3, 0.3]
 TRAIN_EPOCHS = [40, 40, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -43,14 +50,15 @@ PARAMS = {
     'nn_module': ('CustomResnet', {
         'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'classifier': ('fc', {'pooler': 'avgpool'})
+        'classifier': ('fc', {'pooler': 'avgpool', 'ekush': True}),
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 9.032258064516129 * 2,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
+        'ekush_weight': 6.559139784946236,
         'smooth_factor': 0.1,
-        'ohem_rate': 0.8
+        'ohem_rate': 0.8,
     }),
     'optimizer': ('AdamW', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0]
@@ -59,6 +67,7 @@ PARAMS = {
 
 def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
+    ekush_data = get_ekush_data()
 
     model = BengaliAiModel(PARAMS)
     model.params['nn_module'][1]['pretrained'] = False
@@ -68,17 +77,22 @@ def train_fold(save_dir, train_folds, val_folds):
 
     model.set_device(DEVICES)
 
-    for image_size, batch_size, epochs in zip(IMAGE_SIZE, BATCH_SIZE, TRAIN_EPOCHS):
+    for image_size, batch_size, ekush_prob, epochs in zip(IMAGE_SIZE, BATCH_SIZE, EKUSH_PROB, TRAIN_EPOCHS):
         print(f"Start train step: image_size {image_size}, batch_size {batch_size}, epochs {epochs}")
         model.set_lr(get_lr(BASE_LR, batch_size))
 
         train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
+        ekush_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5, pad=12)
         mixer = CutMix(num_mix=1, beta=1.0, prob=1.0)
         test_transform = get_transforms(train=False, size=image_size)
 
-        train_dataset = BengaliAiDataset(folds_data, train_folds,
-                                         transform=train_transform,
-                                         mixer=mixer)
+        bengali_dataset = BengaliAiDataset(folds_data, train_folds,
+                                           transform=train_transform,
+                                           mixer=mixer)
+        ekush_dataset = EkushDataset(ekush_data, transform=ekush_transform, mixer=mixer)
+        train_dataset = RandomDataset([bengali_dataset, ekush_dataset],
+                                      probs=[1 - ekush_prob, ekush_prob])
+
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,

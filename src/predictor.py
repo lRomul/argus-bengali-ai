@@ -23,7 +23,7 @@ def predict_data(data, model, batch_size, transform):
 
     for batch in loader:
         pred_batch = model.predict(batch)
-        grapheme_pred, vowel_pred, consonant_pred = pred_batch
+        grapheme_pred, vowel_pred, consonant_pred = pred_batch[:3]
 
         grapheme_preds_lst.append(grapheme_pred)
         vowel_preds_lst.append(vowel_pred)

@@ -45,3 +45,7 @@ class_map = _get_class_map(class_map_csv_path)
 n_grapheme_roots = len(class_map['grapheme_root'])
 n_vowel_diacritics = len(class_map['vowel_diacritic'])
 n_consonant_diacritics = len(class_map['consonant_diacritic'])
+
+ekush_dir = input_data_dir / 'ekushCSV'
+ekush_meta_path = ekush_dir / 'metaDataCSV.csv'
+n_ekush_labels = 122

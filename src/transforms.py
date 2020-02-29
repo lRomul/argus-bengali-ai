@@ -217,7 +217,24 @@ class Resize:
         return cv2.resize(image, self.size, interpolation=self.interpolation)
 
 
-def get_transforms(train, size, gridmask_p=0.5):
+class Padding:
+    def __init__(self, pad, mode='minimum'):
+        self.pad = pad
+        self.mode = mode
+
+    def __call__(self, image):
+        pad = self.pad
+        return np.pad(image,
+                      ((pad, pad), (pad, pad)),
+                      mode=self.mode)
+
+
+def get_transforms(train, size, pad=None, gridmask_p=0.5):
+    if pad is None:
+        padding = lambda x: x
+    else:
+        padding = Padding(pad)
+
     if size is None:
         resize = lambda x: x
     else:
@@ -225,12 +242,14 @@ def get_transforms(train, size, gridmask_p=0.5):
 
     if train:
         transforms = Compose([
+            padding,
             resize,
             Albumentations(gridmask_p=gridmask_p),
             ImageToTensor()
         ])
     else:
         transforms = Compose([
+            padding,
             resize,
             ImageToTensor()
         ])

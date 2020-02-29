@@ -37,7 +37,7 @@ class CustomResnet(nn.Module):
                  classifier=None):
         super().__init__()
         if classifier is None:
-            classifier = 'fc', {'pooler': 'avgpool'}
+            classifier = 'fc', {'pooler': 'avgpool', 'ekush': False}
 
         resnet, num_bottleneck_filters = ENCODERS[encoder]
         resnet = resnet(pretrained=pretrained)

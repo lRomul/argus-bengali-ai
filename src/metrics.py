@@ -40,8 +40,8 @@ class HierarchicalRecall(Metric):
         self.consonant_recall = Recall()
 
     def update(self, step_output: dict):
-        grapheme_pred, vowel_pred, consonant_pred = step_output['prediction']
-        grapheme_target, vowel_target, consonant_target = step_output['target']
+        grapheme_pred, vowel_pred, consonant_pred = step_output['prediction'][:3]
+        grapheme_target, vowel_target, consonant_target = step_output['target'][:3]
 
         self.grapheme_recall.update(grapheme_pred, grapheme_target)
         self.vowel_recall.update(vowel_pred, vowel_target)
