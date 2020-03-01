@@ -89,7 +89,7 @@ def train_fold(save_dir, train_folds, val_folds):
         bengali_dataset = BengaliAiDataset(folds_data, train_folds,
                                            transform=train_transform,
                                            mixer=mixer)
-        ekush_dataset = EkushDataset(ekush_data, transform=ekush_transform, mixer=mixer)
+        ekush_dataset = EkushDataset(ekush_data, transform=ekush_transform)
         train_dataset = RandomDataset([bengali_dataset, ekush_dataset],
                                       probs=[1 - ekush_prob, ekush_prob])
 
