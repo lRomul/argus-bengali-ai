@@ -33,7 +33,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, 176, 224, 224]
 BATCH_SIZE = [448, 224, 154, 154]
-EKUSH_PROB = [0.3, 0.3, 0.3, 0.0]
+EKUSH_PROB = [0.1, 0.1, 0.1, 0.0]
 TRAIN_EPOCHS = [40, 40, 40, 240]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -56,7 +56,7 @@ PARAMS = {
         'grapheme_weight': 9.032258064516129 * 2,
         'vowel_weight': 0.5913978494623656,
         'consonant_weight': 0.3763440860215054,
-        'ekush_weight': 9.032258064516129,
+        'ekush_weight': 6.559139784946236,
         'smooth_factor': 0.1,
         'ohem_rate': 0.8,
     }),
