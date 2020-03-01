@@ -15,7 +15,8 @@ def predict_data(data, model, batch_size, transform):
                                transform=transform)
     loader = DataLoader(dataset,
                         batch_size=batch_size,
-                        shuffle=False)
+                        shuffle=False,
+                        num_workers=2)
 
     grapheme_preds_lst = []
     vowel_preds_lst = []
@@ -30,12 +31,15 @@ def predict_data(data, model, batch_size, transform):
         consonant_preds_lst.append(consonant_pred)
 
     grapheme_pred = torch.cat(grapheme_preds_lst, dim=0)
+    grapheme_pred = torch.sigmoid(grapheme_pred)
     grapheme_pred = grapheme_pred.cpu().numpy()
 
     vowel_pred = torch.cat(vowel_preds_lst, dim=0)
+    vowel_pred = torch.sigmoid(vowel_pred)
     vowel_pred = vowel_pred.cpu().numpy()
 
     consonant_pred = torch.cat(consonant_preds_lst, dim=0)
+    consonant_pred = torch.sigmoid(consonant_pred)
     consonant_pred = consonant_pred.cpu().numpy()
 
     return grapheme_pred, vowel_pred, consonant_pred

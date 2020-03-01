@@ -57,7 +57,7 @@ def get_class_prediction_df(class_name):
             probs_df_lst.append(probs_df)
 
     if len(probs_df_lst) > 1:
-        pred_df = blend_predictions(probs_df_lst, use_gmean=False)
+        pred_df = blend_predictions(probs_df_lst, use_gmean=True)
     else:
         pred_df = probs_df_lst[0]
 
