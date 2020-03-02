@@ -2,6 +2,8 @@ import torch
 import random
 import numpy as np
 
+from src import fmix
+
 
 def get_random_sample(dataset):
     rnd_idx = random.randint(0, len(dataset) - 1)
@@ -53,6 +55,40 @@ class CutMix:
             image[:, bbx1:bbx2, bby1:bby2] = rnd_image[:, bbx1:bbx2, bby1:bby2]
         lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1)
                    / (image.shape[-1] * image.shape[-2]))
+
+        new_target = []
+        for trg, rnd_trg in zip(target, rnd_target):
+            new_trg = trg, rnd_trg, torch.tensor(lam, dtype=torch.float32)
+            new_target.append(new_trg)
+        target = new_target
+
+        return image, target
+
+
+class FMix:
+    def __init__(self, decay_power=3, alpha=1, max_soft=0.0, reformulate=False):
+        self.decay_power = decay_power
+        self.alpha = alpha
+        self.max_soft = max_soft
+        self.reformulate = reformulate
+
+    def __call__(self, dataset, image, target):
+        rnd_image, rnd_target = get_random_sample(dataset)
+
+        lam, mask = fmix.sample_mask(alpha=self.alpha,
+                                     decay_power=self.decay_power,
+                                     shape=image.shape[:2],
+                                     max_soft=0.0,
+                                     reformulate=False)
+
+        mask = mask[0]
+        if self.max_soft == 0.0:
+            mask = mask.astype(np.uint8)
+
+        image = image * mask + rnd_image * (1 - mask)
+
+        if self.max_soft != 0.0:
+            image = image.astype(np.uint8)
 
         new_target = []
         for trg, rnd_trg in zip(target, rnd_target):

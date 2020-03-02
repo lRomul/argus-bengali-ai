@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
-from src.mixers import CutMix
+from src.mixers import FMix
 from src.utils import initialize_amp
 from src import config
 
@@ -73,7 +73,7 @@ def train_fold(save_dir, train_folds, val_folds):
         model.set_lr(get_lr(BASE_LR, batch_size))
 
         train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
-        mixer = CutMix(beta=1.0)
+        mixer = FMix(decay_power=3, alpha=1, max_soft=0.0, reformulate=False)
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
