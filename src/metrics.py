@@ -17,7 +17,6 @@ class Recall:
     def update(self, pred, target):
         _, pred = torch.max(pred, 1)
         pred = pred.cpu().numpy()
-        _, target = torch.max(target, 1)
         target = target.cpu().numpy()
 
         self.predictions.append(pred)

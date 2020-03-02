@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from src.datasets import BengaliAiDataset, get_folds_data
 from src.argus_models import BengaliAiModel
 from src.transforms import get_transforms
-from src.mixers import UseMixerWithProb, CutMix
+from src.mixers import CutMix
 from src.utils import initialize_amp
 from src import config
 
@@ -46,9 +46,9 @@ PARAMS = {
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 9.032258064516129 * 2,
-        'vowel_weight': 0.5913978494623656,
-        'consonant_weight': 0.3763440860215054,
+        'grapheme_weight': 2.0,
+        'vowel_weight': 1.0,
+        'consonant_weight': 1.0,
         'smooth_factor': 0.1,
         'ohem_rate': 0.8
     }),
@@ -73,7 +73,7 @@ def train_fold(save_dir, train_folds, val_folds):
         model.set_lr(get_lr(BASE_LR, batch_size))
 
         train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
-        mixer = CutMix(num_mix=1, beta=1.0, prob=1.0)
+        mixer = CutMix(beta=1.0)
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,

@@ -1,3 +1,4 @@
+import torch
 import random
 import numpy as np
 
@@ -37,98 +38,27 @@ def rand_bbox(size, lam):
     return bbx1, bby1, bbx2, bby2
 
 
-class MixUp:
-    def __init__(self, alpha_dist='beta'):
-        assert alpha_dist in ['uniform', 'beta']
-        self.alpha_dist = alpha_dist
-
-    def sample_alpha(self):
-        if self.alpha_dist == 'uniform':
-            return random.uniform(0, 0.5)
-        elif self.alpha_dist == 'beta':
-            return np.random.beta(0.4, 0.4)
+class CutMix:
+    def __init__(self, beta=1.0):
+        self.beta = beta
 
     def __call__(self, dataset, image, target):
+        lam = np.random.beta(self.beta, self.beta)
         rnd_image, rnd_target = get_random_sample(dataset)
 
-        alpha = self.sample_alpha()
-        image = (1 - alpha) * image + alpha * rnd_image
+        bbx1, bby1, bbx2, bby2 = rand_bbox(image.shape, lam)
+        if len(image.shape) == 2:
+            image[bbx1:bbx2, bby1:bby2] = rnd_image[bbx1:bbx2, bby1:bby2]
+        else:
+            image[:, bbx1:bbx2, bby1:bby2] = rnd_image[:, bbx1:bbx2, bby1:bby2]
+        lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1)
+                   / (image.shape[-1] * image.shape[-2]))
+
         new_target = []
         for trg, rnd_trg in zip(target, rnd_target):
-            trg = (1 - alpha) * trg + alpha * rnd_trg
-            new_target.append(trg)
-        return image, new_target
-
-
-class CutMix:
-    def __init__(self, num_mix=1, beta=1.0, prob=1.0):
-        self.num_mix = num_mix
-        self.beta = beta
-        self.prob = prob
-
-    def __call__(self, dataset, image, target):
-        for _ in range(self.num_mix):
-            r = np.random.rand(1)
-            if self.beta <= 0 or r > self.prob:
-                continue
-
-            # generate mixed sample
-            lam = np.random.beta(self.beta, self.beta)
-            rnd_image, rnd_target = get_random_sample(dataset)
-
-            bbx1, bby1, bbx2, bby2 = rand_bbox(image.shape, lam)
-            if len(image.shape) == 2:
-                image[bbx1:bbx2, bby1:bby2] = rnd_image[bbx1:bbx2, bby1:bby2]
-            else:
-                image[:, bbx1:bbx2, bby1:bby2] = rnd_image[:, bbx1:bbx2, bby1:bby2]
-            lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1)
-                       / (image.shape[-1] * image.shape[-2]))
-
-            new_target = []
-            for trg, rnd_trg in zip(target, rnd_target):
-                trg = trg * lam + rnd_trg * (1 - lam)
-                new_target.append(trg)
-            target = new_target
-
-        return image, target
-
-
-class CutMixPixelSum:
-    def __init__(self, num_mix=1, beta=1.0, prob=1.0, pixel_sum_weight=0.5):
-        self.num_mix = num_mix
-        self.beta = beta
-        self.prob = prob
-        self.pixel_sum_weight = pixel_sum_weight
-
-    def __call__(self, dataset, image, target):
-        for _ in range(self.num_mix):
-            r = np.random.rand(1)
-            if self.beta <= 0 or r > self.prob:
-                continue
-
-            # generate mixed sample
-            lam = np.random.beta(self.beta, self.beta)
-            rnd_image, rnd_target = get_random_sample(dataset)
-
-            bbx1, bby1, bbx2, bby2 = rand_bbox(image.size(), lam)
-            rnd_image_crop = rnd_image[:, bbx1:bbx2, bby1:bby2]
-
-            rnd_crop_sum = rnd_image_crop.sum()
-            image_sum = image.sum() - image[:, bbx1:bbx2, bby1:bby2].sum()
-
-            image[:, bbx1:bbx2, bby1:bby2] = rnd_image_crop
-
-            pixel_sum_lam = 1 - rnd_crop_sum / (rnd_crop_sum + image_sum)
-            area_lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1)
-                            / (image.size()[-1] * image.size()[-2]))
-            lam = pixel_sum_lam * self.pixel_sum_weight \
-                  + area_lam * (1 - self.pixel_sum_weight)
-
-            new_target = []
-            for trg, rnd_trg in zip(target, rnd_target):
-                trg = trg * lam + rnd_trg * (1 - lam)
-                new_target.append(trg)
-            target = new_target
+            new_trg = trg, rnd_trg, torch.tensor(lam, dtype=torch.float32)
+            new_target.append(new_trg)
+        target = new_target
 
         return image, target
 
