@@ -142,17 +142,27 @@ def get_ekush_data():
                     'ekush_label': int(row[-1])
                 })
 
+    np.random.seed(42)
+    folds = np.random.randint(0, config.n_folds, len(data_list))
+    for sample, fold in zip(data_list, folds):
+        sample['fold'] = int(fold)
+
     return data_list
 
 
 class EkushDataset(Dataset):
     def __init__(self,
                  data,
+                 folds=None,
                  transform=None,
                  mixer=None):
         self.transform = transform
         self.mixer = mixer
         self.data = data
+        if folds is None:
+            self.data = data
+        else:
+            self.data = [s for s in data if s['fold'] in folds]
 
     def __len__(self):
         return len(self.data)

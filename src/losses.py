@@ -58,34 +58,36 @@ class BengaliAiCrossEntropy(nn.Module):
             ekush_indexes = ekush_target.sum(dim=1) != 0.0
             bengali_indexes = ~ekush_indexes
             ekush = torch.any(ekush_indexes).item()
+            bengali = torch.any(bengali_indexes).item()
 
         loss = 0
 
-        grapheme_pred = grapheme_pred[bengali_indexes]
-        grapheme_target = grapheme_target[bengali_indexes]
-        vowel_pred = vowel_pred[bengali_indexes]
-        vowel_target = vowel_target[bengali_indexes]
-        consonant_pred = consonant_pred[bengali_indexes]
-        consonant_target = consonant_target[bengali_indexes]
+        if bengali:
+            grapheme_pred = grapheme_pred[bengali_indexes]
+            grapheme_target = grapheme_target[bengali_indexes]
+            vowel_pred = vowel_pred[bengali_indexes]
+            vowel_target = vowel_target[bengali_indexes]
+            consonant_pred = consonant_pred[bengali_indexes]
+            consonant_target = consonant_target[bengali_indexes]
 
-        if self.grapheme_weight:
-            loss += self.grapheme_weight \
-                    * self.grapheme_ce(grapheme_pred, grapheme_target,
-                                       training=training)
+            if self.grapheme_weight:
+                loss += self.grapheme_weight \
+                        * self.grapheme_ce(grapheme_pred, grapheme_target,
+                                           training=training)
 
-        if self.vowel_weight:
-            loss += self.vowel_weight \
-                    * self.vowel_ce(vowel_pred, vowel_target,
-                                    training=training)
-
-        if self.consonant_weight:
-            loss += self.consonant_weight \
-                    * self.consonant_ce(consonant_pred, consonant_target,
+            if self.vowel_weight:
+                loss += self.vowel_weight \
+                        * self.vowel_ce(vowel_pred, vowel_target,
                                         training=training)
 
+            if self.consonant_weight:
+                loss += self.consonant_weight \
+                        * self.consonant_ce(consonant_pred, consonant_target,
+                                            training=training)
+
         if ekush:
-            ekush_pred = ekush_pred[bengali_indexes]
-            ekush_target = ekush_target[bengali_indexes]
+            ekush_pred = ekush_pred[ekush_indexes]
+            ekush_target = ekush_target[ekush_indexes]
 
             if self.ekush_weight:
                 loss += self.ekush_weight \
