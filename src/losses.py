@@ -3,27 +3,50 @@ from torch import nn
 import torch.nn.functional as F
 
 
-class SoftBCELoss(nn.Module):
+class LabelSmoothingCrossEntropy(nn.Module):
+    """
+    NLL loss with label smoothing.
+    """
+    def __init__(self, smoothing=0.1):
+        """
+        Constructor for the LabelSmoothing module.
+        :param smoothing: label smoothing factor
+        """
+        super(LabelSmoothingCrossEntropy, self).__init__()
+        assert smoothing < 1.0
+        self.smoothing = smoothing
+        self.confidence = 1. - smoothing
+
+    def forward(self, x, target):
+        logprobs = F.log_softmax(x, dim=-1)
+        nll_loss = -logprobs.gather(dim=-1, index=target.unsqueeze(1))
+        nll_loss = nll_loss.squeeze(1)
+        smooth_loss = -logprobs.mean(dim=-1)
+        loss = self.confidence * nll_loss + self.smoothing * smooth_loss
+        return loss
+
+
+class SmoothingOhemCrossEntropy(nn.Module):
     def __init__(self, smooth_factor=0.0, ohem_rate=1.0):
         super().__init__()
         self.smooth_factor = float(smooth_factor)
         self.ohem_rate = ohem_rate
+        self.ce = LabelSmoothingCrossEntropy(smoothing=self.smooth_factor)
 
     def forward(self, label_input, label_target, training=False):
-        if self.smooth_factor > 0.0:
-            label_target = (1 - label_target) * self.smooth_factor \
-                           + label_target * (1 - self.smooth_factor)
+        if isinstance(label_target, (tuple, list)):
+            y1, y2, lam = label_target
+            loss = self.ce(label_input, y1) * lam + self.ce(label_input, y2) * (1 - lam)
 
-        loss = F.binary_cross_entropy_with_logits(label_input, label_target, reduction="none")
-
-        if training and self.ohem_rate < 1.0:
-            loss = torch.mean(loss, dim=1)
-            _, idx = torch.sort(loss, descending=True)
-            keep_num = int(label_input.size(0) * self.ohem_rate)
-            if keep_num < label_input.size(0):
-                keep_idx = idx[:keep_num]
-                loss = loss[keep_idx]
-                return loss.sum() / keep_num
+            if training and self.ohem_rate < 1.0:
+                _, idx = torch.sort(loss, descending=True)
+                keep_num = int(label_input.size(0) * self.ohem_rate)
+                if keep_num < label_input.size(0):
+                    keep_idx = idx[:keep_num]
+                    loss = loss[keep_idx]
+                    return loss.sum() / keep_num
+        else:
+            loss = self.ce(label_input, label_target)
 
         return loss.mean()
 
@@ -43,7 +66,8 @@ class BengaliAiCrossEntropy(nn.Module):
         self.smooth_factor = smooth_factor
         self.ohem_rate = ohem_rate
 
-        loss = SoftBCELoss(smooth_factor=smooth_factor, ohem_rate=ohem_rate)
+        loss = SmoothingOhemCrossEntropy(smooth_factor=smooth_factor,
+                                         ohem_rate=ohem_rate)
         self.grapheme_ce = loss
         self.vowel_ce = loss
         self.consonant_ce = loss

@@ -94,12 +94,9 @@ class BengaliAiDataset(Dataset):
         if not self.target:
             return image
 
-        grapheme = torch.zeros(config.n_grapheme_roots, dtype=torch.float32)
-        grapheme[sample['grapheme_root']] = 1.0
-        vowel = torch.zeros(config.n_vowel_diacritics, dtype=torch.float32)
-        vowel[sample['vowel_diacritic']] = 1.0
-        consonant = torch.zeros(config.n_consonant_diacritics, dtype=torch.float32)
-        consonant[sample['consonant_diacritic']] = 1.0
+        grapheme = torch.tensor(sample['grapheme_root'], dtype=torch.int64)
+        vowel = torch.tensor(sample['vowel_diacritic'], dtype=torch.int64)
+        consonant = torch.tensor(sample['consonant_diacritic'], dtype=torch.int64)
         target = grapheme, vowel, consonant
 
         return image, target
