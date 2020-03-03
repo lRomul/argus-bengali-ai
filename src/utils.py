@@ -3,6 +3,8 @@ import numpy as np
 from pathlib import Path
 from scipy.stats.mstats import gmean
 
+from src.ema import ModelEma
+
 
 def initialize_amp(model,
                    opt_level='O1',
@@ -16,6 +18,13 @@ def initialize_amp(model,
         loss_scale=loss_scale
     )
     model.amp = amp
+
+
+def initialize_ema(model, decay=0.9999, device='', resume=''):
+    model.model_ema = ModelEma(model.nn_module,
+                               decay=decay,
+                               device=device,
+                               resume=resume)
 
 
 def blend_predictions(probs_df_lst, use_gmean=True):
