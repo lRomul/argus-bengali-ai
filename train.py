@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, None]
 BATCH_SIZE = [448, 224]
-TRAIN_EPOCHS = [40, 200]
+TRAIN_EPOCHS = [40, 180]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
