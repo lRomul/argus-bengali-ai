@@ -23,7 +23,7 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [448, 224, 224]
+BATCH_SIZE = [313, 156, 156]
 TRAIN_EPOCHS = [40, 180, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
@@ -40,7 +40,7 @@ def get_lr(base_lr, batch_size):
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('CustomResnet', {
-        'encoder': 'gluon_resnet50_v1d',
+        'encoder': 'skresnext50_32x4d',
         'pretrained': True,
         'classifier': ('fc', {'pooler': 'avgpool'})
     }),
@@ -70,7 +70,7 @@ def train_fold(save_dir, train_folds, val_folds):
     if USE_EMA:
         initialize_ema(model, decay=0.9999)
 
-    lr_scheduler = CosineAnnealingLR(T_max=sum(TRAIN_EPOCHS), eta_min=1e-5)
+    lr_scheduler = CosineAnnealingLR(T_max=sum(TRAIN_EPOCHS), eta_min=3e-5)
     prev_batch = BATCH_SIZE[0]
 
     for image_size, batch_size, epochs, cooldown in zip(IMAGE_SIZE, BATCH_SIZE,
@@ -82,10 +82,7 @@ def train_fold(save_dir, train_folds, val_folds):
         model.set_lr(model.get_lr() * batch_lr_scale)
 
         train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
-        if not cooldown:
-            mixer = CutMix(beta=1.0)
-        else:
-            mixer = None
+        mixer = CutMix(beta=1.0)
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
