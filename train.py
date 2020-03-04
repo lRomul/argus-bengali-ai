@@ -68,7 +68,7 @@ def train_fold(save_dir, train_folds, val_folds):
     model.set_device(DEVICES)
 
     if USE_EMA:
-        initialize_ema(model, decay=0.9999)
+        initialize_ema(model, decay=0.9998)
 
     lr_scheduler = CosineAnnealingLR(T_max=sum(TRAIN_EPOCHS), eta_min=3e-5)
     prev_batch = BATCH_SIZE[0]
