@@ -77,7 +77,7 @@ class EmaMonitorCheckpoint(MonitorCheckpoint):
     def save(self, file_path, argus_state):
         nn_module = argus_state.model.model_ema.ema
         state = {
-            'model_name': self.__class__.__name__,
+            'model_name': argus_state.model.__class__.__name__,
             'params': argus_state.model.params,
             'nn_state_dict': deep_to(nn_module.state_dict(), 'cpu')
         }

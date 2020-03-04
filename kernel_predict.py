@@ -16,7 +16,7 @@ args = parser.parse_args()
 EXPERIMENTS = args.experiment.split(',')
 DEVICE = 'cuda'
 BATCH_SIZE = 256
-IMAGE_SIZE = 224
+IMAGE_SIZE = None
 
 
 def predict_test(test_data, predictor, experiment, fold, batch_num):

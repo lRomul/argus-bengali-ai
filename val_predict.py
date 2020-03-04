@@ -16,7 +16,7 @@ EXPERIMENT_DIR = config.experiments_dir / args.experiment
 PREDICTION_DIR = config.predictions_dir / args.experiment
 DEVICE = 'cuda'
 BATCH_SIZE = 256
-IMAGE_SIZE = 224
+IMAGE_SIZE = None
 
 
 def predict_val_fold(folds_data, predictor, fold):
