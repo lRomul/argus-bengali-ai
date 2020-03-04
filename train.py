@@ -82,7 +82,10 @@ def train_fold(save_dir, train_folds, val_folds):
         model.set_lr(model.get_lr() * batch_lr_scale)
 
         train_transform = get_transforms(train=True, size=image_size, gridmask_p=0.5)
-        mixer = CutMix(beta=1.0)
+        if not cooldown:
+            mixer = CutMix(beta=1.0)
+        else:
+            mixer = None
         test_transform = get_transforms(train=False, size=image_size)
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
