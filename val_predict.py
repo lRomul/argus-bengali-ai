@@ -1,5 +1,5 @@
 import argparse
-import pandas as pd
+import numpy as np
 
 from src.utils import get_best_model_path
 from src.datasets import get_folds_data
@@ -27,12 +27,15 @@ def predict_val_fold(folds_data, predictor, fold):
     image_ids = [s['image_id'] for s in data]
 
     preds = predictor.predict(data)
+    grapheme_pred, vowel_pred, consonant_pred = preds
 
-    for name, pred in zip(config.class_map.keys(), preds):
-        probs_df = pd.DataFrame(data=pred,
-                                index=image_ids)
-        probs_df.index.name = 'image_id'
-        probs_df.to_csv(fold_prediction_dir / f'{name}_probs.csv')
+    np.savez(
+        fold_prediction_dir / 'preds.npz',
+        grapheme_pred=grapheme_pred,
+        vowel_pred=vowel_pred,
+        consonant_pred=consonant_pred,
+        image_ids=image_ids,
+    )
 
 
 if __name__ == "__main__":
@@ -50,6 +53,5 @@ if __name__ == "__main__":
                               transform=transforms,
                               device=DEVICE)
 
-        if folds_data is not None:
-            print("Val predict")
-            predict_val_fold(folds_data, predictor, fold)
+        print("Val predict")
+        predict_val_fold(folds_data, predictor, fold)
