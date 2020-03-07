@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
 BATCH_SIZE = [313, 156, 156]
-TRAIN_EPOCHS = [40, 120, 20]
+TRAIN_EPOCHS = [40, 140, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
