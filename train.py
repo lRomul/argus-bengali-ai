@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
 BATCH_SIZE = [313, 156, 156]
-TRAIN_EPOCHS = [40, 140, 20]
+TRAIN_EPOCHS = [40, 160, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -45,7 +45,7 @@ PARAMS = {
         'classifier': ('fc', {'pooler': None})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 2.0,
+        'grapheme_weight': 1.0,
         'vowel_weight': 1.0,
         'consonant_weight': 1.0,
         'smooth_factor': 0.1,
