@@ -11,21 +11,22 @@ from src import config
 
 
 EXPERIMENTS = [
-    'gmaug_009',
-    'cooldown_005'
+    'cooldown_004_nf',
+    'cooldown_005',
 ]
 
 STACK_EXPERIMENTS = [
-    'fcnet_stacking_rs_001/3007'
+    'stacking_001'
 ]
 
 ENSEMBLE_EXPERIMENTS = [
+    'cooldown_004_nf',
     'cooldown_005',
-    'fcnet_stacking_rs_001/3007'
+    'stacking_001'
 ]
 
 DEVICE = 'cuda'
-BATCH_SIZE = 256
+BATCH_SIZE = 32
 DATA_BATCH = 2
 IMAGE_SIZE = None
 

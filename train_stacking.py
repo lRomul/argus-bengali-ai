@@ -16,19 +16,17 @@ from src.utils import initialize_ema
 from src import config
 
 
-STACKING_EXPERIMENT = "test_stacking_007"
+STACKING_EXPERIMENT = "stacking_001"
 
 EXPERIMENTS = [
-    'gmaug_008',
-    'gmaug_009',
+    'cooldown_004_nf',
+    'cooldown_005',
 ]
-EPOCHS = 80
 USE_EMA = False
-RS_PARAMS = {"base_size": 512, "reduction_scale": 1, "p_dropout": 0.1662788540244386, "lr": 2.5814932060476834e-05,
-             "patience": 7, "factor": 0.5537460438294733, "batch_size": 128}
+RS_PARAMS = {"base_size": 256, "reduction_scale": 4, "p_dropout": 0.02446562971778976, "lr": 4.796301375650003e-05,
+             "epochs": 114, "eta_min_scale": 0.02442943902352819, "batch_size": 32}
 BATCH_SIZE = RS_PARAMS['batch_size']
 DATASET_SIZE = 128 * 256
-CORRECTIONS = True
 NUM_WORKERS = 2
 
 SAVE_DIR = config.experiments_dir / STACKING_EXPERIMENT
@@ -73,14 +71,15 @@ def train_fold(save_dir, train_folds, val_folds, folds_data):
 
     callbacks = [
         checkpointer,
-        CosineAnnealingLR(T_max=EPOCHS, eta_min=RS_PARAMS['lr'] * 0.1),
+        CosineAnnealingLR(T_max=RS_PARAMS['epochs'],
+                          eta_min=RS_PARAMS['lr'] * RS_PARAMS['eta_min_scale']),
         EarlyStopping(monitor='val_hierarchical_recall', patience=30),
         LoggingToFile(save_dir / 'log.txt'),
     ]
 
     model.fit(train_loader,
               val_loader=val_loader,
-              max_epochs=EPOCHS,
+              max_epochs=RS_PARAMS['epochs'],
               callbacks=callbacks,
               metrics=['hierarchical_recall'])
 
