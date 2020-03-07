@@ -37,6 +37,7 @@ if kernel_mode:
 else:
     experiments_dir = output_data_dir / 'experiments'
 predictions_dir = output_data_dir / 'predictions'
+tmp_predictions_dir = output_data_dir / 'tmp_predictions'
 
 n_folds = 5
 folds = list(range(n_folds))

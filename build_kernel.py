@@ -81,3 +81,5 @@ if __name__ == '__main__':
     os.system('rm -rf kernel && mkdir kernel')
     build_script(IGNORE_LIST, PACKAGES,
                  template_name='kernel_template.py')
+    build_script(IGNORE_LIST, PACKAGES,
+                 template_name='kernel_stacking_template.py')
