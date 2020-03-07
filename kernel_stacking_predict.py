@@ -57,6 +57,9 @@ def load_fold_experiment_pred(experiment_preds_dir, fold):
 
     for batch in range(DATA_BATCH):
         preds_path = experiment_preds_dir / f'fold_{fold}' / f'preds_{batch}.npz'
+        if not preds_path.exists():
+            raise FileNotFoundError
+
         preds = np.load(preds_path)
         grapheme_pred_lst.append(preds['grapheme_pred'])
         vowel_pred_lst.append(preds['vowel_pred'])
@@ -91,7 +94,12 @@ def load_experiment_predictions(experiment):
     prev_image_ids = None
 
     for fold in config.folds:
-        preds, image_ids = load_fold_experiment_pred(experiment_preds_dir, fold)
+        try:
+            preds, image_ids = load_fold_experiment_pred(experiment_preds_dir, fold)
+        except FileNotFoundError as e:
+            print(f"Skip fold {fold} {experiment}")
+            continue
+
         grapheme_pred, vowel_pred, consonant_pred = preds
         grapheme_pred_lst.append(grapheme_pred)
         vowel_pred_lst.append(vowel_pred)
@@ -151,8 +159,13 @@ def get_class_prediction_df(class_name):
     for experiment in ENSEMBLE_EXPERIMENTS:
         experiment_probs_df_lst = []
         for fold in config.folds:
-            fold_prediction_dir = config.tmp_predictions_dir / experiment / f'fold_{fold}'
-            preds = np.load(fold_prediction_dir / 'preds.npz')
+            fold_prediction_path = config.tmp_predictions_dir / experiment \
+                                   / f'fold_{fold}' / 'preds.npz'
+            if not fold_prediction_path.exists():
+                print(f"Skip {fold_prediction_path}")
+                continue
+            
+            preds = np.load(fold_prediction_path)
             class_preds = preds[class_name.split('_')[0] + '_pred']
 
             probs_df = pd.DataFrame(data=class_preds,
