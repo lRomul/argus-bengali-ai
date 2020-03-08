@@ -23,6 +23,10 @@ def run(command):
               f'export KERNEL_MODE={KERNEL_MODE} && ' + command)
 
 
+run('pip install /kaggle/input/fastparquet/python_snappy-0.5.4-cp36-cp36m-linux_x86_64.whl')
+run('pip install /kaggle/input/fastparquet/thrift-0.13.0-cp36-cp36m-linux_x86_64.whl')
+run('pip install /kaggle/input/fastparquet/fastparquet-0.3.2-cp36-cp36m-linux_x86_64.whl')
+
 run('pip install /kaggle/input/bengali-ai-deps/pytorch-image-models')
 
 run('python make_folds.py')

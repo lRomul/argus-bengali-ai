@@ -16,11 +16,11 @@ def process_raw_image(image):
     return image
 
 
-def get_image_data_dict(image_data_paths):
+def get_image_data_dict(image_data_paths, engine='auto'):
     image_data_dict = dict()
     for image_data_path in image_data_paths:
         print("Load parquet", image_data_path)
-        data_df = pd.read_parquet(image_data_path)
+        data_df = pd.read_parquet(image_data_path, engine=engine)
         data_df.set_index('image_id', inplace=True)
         for image_id, raw_image in zip(data_df.index, data_df.values):
             image = process_raw_image(raw_image)
@@ -29,10 +29,11 @@ def get_image_data_dict(image_data_paths):
     return image_data_dict
 
 
-def get_folds_data():
+def get_folds_data(engine='auto'):
     print("Get folds data")
     train_folds_df = pd.read_csv(config.train_folds_path)
-    train_image_data = get_image_data_dict(config.train_image_data_paths)
+    train_image_data = get_image_data_dict(config.train_image_data_paths,
+                                           engine=engine)
 
     folds_data = []
     for _, row in train_folds_df.iterrows():
@@ -44,14 +45,15 @@ def get_folds_data():
     return folds_data
 
 
-def get_test_data_generator(batch=None):
+def get_test_data_generator(batch=None, engine='auto'):
     print("Get test data")
     if batch is None:
         batch = len(config.test_image_data_paths)
 
     for i in range(0, len(config.test_image_data_paths), batch):
         test_image_data_paths = config.test_image_data_paths[i:i + batch]
-        test_image_data = get_image_data_dict(test_image_data_paths)
+        test_image_data = get_image_data_dict(test_image_data_paths,
+                                              engine=engine)
 
         test_data = []
         for image_id, image in test_image_data.items():

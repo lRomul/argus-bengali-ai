@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 from src.stacking.predictor import StackPredictor
 
@@ -50,7 +51,7 @@ def predict_test(test_data, predictor, experiment, fold, batch_num):
     )
 
 
-def load_fold_experiment_pred(experiment_preds_dir, fold):
+def concat_fold_experiment_pred(experiment_preds_dir, fold):
     grapheme_pred_lst = []
     vowel_pred_lst = []
     consonant_pred_lst = []
@@ -72,8 +73,6 @@ def load_fold_experiment_pred(experiment_preds_dir, fold):
     consonant_pred = np.concatenate(consonant_pred_lst)
     image_ids = np.concatenate(image_ids_lst)
 
-    preds = grapheme_pred, vowel_pred, consonant_pred
-
     np.savez(
         experiment_preds_dir / f'fold_{fold}' / f'preds.npz',
         grapheme_pred=grapheme_pred,
@@ -82,6 +81,19 @@ def load_fold_experiment_pred(experiment_preds_dir, fold):
         image_ids=image_ids,
     )
 
+
+def load_fold_experiment_pred(experiment_preds_dir, fold):
+    preds_path = experiment_preds_dir / f'fold_{fold}' / f'preds.npz'
+    if not preds_path.exists():
+        raise FileNotFoundError
+    npz_preds = np.load()
+
+    grapheme_pred = npz_preds['grapheme_pred']
+    vowel_pred = npz_preds['vowel_pred']
+    consonant_pred = npz_preds['consonant_pred']
+    image_ids = npz_preds['image_ids']
+
+    preds = grapheme_pred, vowel_pred, consonant_pred
     return preds, image_ids
 
 
@@ -168,6 +180,7 @@ def get_class_prediction_df(class_name):
             
             preds = np.load(fold_prediction_path)
             class_preds = preds[class_name.split('_')[0] + '_pred']
+            image_ids = preds['image_ids']
 
             if BLEND_SOFTMAX:
                 class_preds = torch.tensor(class_preds)
@@ -226,24 +239,25 @@ if __name__ == "__main__":
     print("Batch size:", BATCH_SIZE)
     print("Data batch size:", DATA_BATCH)
     print("Image size:", IMAGE_SIZE)
+    print("Time", datetime.now())
 
     transforms = get_transforms(train=False, size=IMAGE_SIZE)
-    test_data_generator = get_test_data_generator(batch=DATA_BATCH)
+    test_data_generator = get_test_data_generator(batch=DATA_BATCH, engine='fastparquet')
 
     for batch_num, test_data in enumerate(test_data_generator):
-        print("Predict batch", batch_num)
+        print(datetime.now(), "Predict batch", batch_num)
 
         for experiment in EXPERIMENTS:
-            print("Predict experiment", experiment)
+            print(datetime.now(), "Predict experiment", experiment)
             for fold in config.folds:
                 fold_dir = config.experiments_dir / experiment / f'fold_{fold}'
                 model_path = get_best_model_path(fold_dir)
 
                 if model_path is None:
-                    print("Skip fold", fold)
+                    print(datetime.now(), "Skip fold", fold)
                     continue
 
-                print("Predict fold", fold)
+                print(datetime.now(), "Predict fold", fold)
                 print("Model path", model_path)
                 predictor = Predictor(model_path,
                                       batch_size=BATCH_SIZE,
@@ -251,16 +265,26 @@ if __name__ == "__main__":
                                       device=DEVICE)
                 predict_test(test_data, predictor, experiment, fold, batch_num)
 
+    print(datetime.now(), "Concat data batch predictions")
+    for experiment in EXPERIMENTS:
+        for fold in config.folds:
+            experiment_preds_dir = config.tmp_predictions_dir / experiment
+            try:
+                concat_fold_experiment_pred(experiment_preds_dir, fold)
+            except FileNotFoundError as e:
+                print(datetime.now(), f"Skip fold {fold} {experiment}")
+                continue
+
     if STACK_FEATURES_EXPERIMENTS and STACK_EXPERIMENTS:
         preds, image_ids = load_experiments_predictions(STACK_FEATURES_EXPERIMENTS)
         for experiment in STACK_EXPERIMENTS:
-            print("Predict stacking experiment", experiment)
+            print(datetime.now(), "Predict stacking experiment", experiment)
             for fold in config.folds:
                 fold_dir = config.experiments_dir / experiment / f'fold_{fold}'
 
                 model_path = get_best_model_path(fold_dir)
 
-                print("Predict fold", fold)
+                print(datetime.now(), "Predict fold", fold)
                 print("Model path", model_path)
                 predictor = StackPredictor(model_path,
                                            batch_size=BATCH_SIZE,
@@ -268,5 +292,5 @@ if __name__ == "__main__":
 
                 predict_stacking_test(preds, predictor, experiment, fold)
 
-    print("Blend folds predictions")
+    print(datetime.now(), "Blend folds predictions")
     blend_test_predictions()
