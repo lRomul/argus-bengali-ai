@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 import pandas as pd
 
@@ -15,18 +16,24 @@ EXPERIMENTS = [
     'cooldown_005',
 ]
 
+STACK_FEATURES_EXPERIMENTS = [
+    'cooldown_004_nf',
+    'cooldown_005',
+]
+
 STACK_EXPERIMENTS = [
     'stacking_001'
 ]
 
-ENSEMBLE_EXPERIMENTS = [
+BLEND_EXPERIMENTS = [
     'cooldown_004_nf',
     'cooldown_005',
     'stacking_001'
 ]
 
+BLEND_SOFTMAX = True
 DEVICE = 'cuda'
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 DATA_BATCH = 2
 IMAGE_SIZE = None
 
@@ -156,17 +163,22 @@ def predict_stacking_test(probs, predictor, experiment, fold):
 
 def get_class_prediction_df(class_name):
     probs_df_lst = []
-    for experiment in ENSEMBLE_EXPERIMENTS:
+    for experiment in BLEND_EXPERIMENTS:
         experiment_probs_df_lst = []
         for fold in config.folds:
             fold_prediction_path = config.tmp_predictions_dir / experiment \
                                    / f'fold_{fold}' / 'preds.npz'
             if not fold_prediction_path.exists():
-                print(f"Skip {fold_prediction_path}")
+                print(f"Skip {class_name} {fold_prediction_path}")
                 continue
             
             preds = np.load(fold_prediction_path)
             class_preds = preds[class_name.split('_')[0] + '_pred']
+
+            if BLEND_SOFTMAX:
+                class_preds = torch.tensor(class_preds)
+                class_preds = torch.softmax(class_preds, dim=1)
+                class_preds = class_preds.numpy()
 
             probs_df = pd.DataFrame(data=class_preds,
                                     index=image_ids)
@@ -208,6 +220,15 @@ def blend_test_predictions():
 
 
 if __name__ == "__main__":
+    print("Experiments", EXPERIMENTS)
+    print("Stack features experiments", STACK_FEATURES_EXPERIMENTS)
+    print("Stack experiments", STACK_EXPERIMENTS)
+    print("Blend experiments", BLEND_EXPERIMENTS)
+    print("Blend softmax", BLEND_SOFTMAX)
+    print("Batch size", BATCH_SIZE)
+    print("Data batch size", DATA_BATCH)
+    print("Image size", IMAGE_SIZE)
+
     transforms = get_transforms(train=False, size=IMAGE_SIZE)
     test_data_generator = get_test_data_generator(batch=DATA_BATCH)
 
@@ -232,7 +253,7 @@ if __name__ == "__main__":
                                       device=DEVICE)
                 predict_test(test_data, predictor, experiment, fold, batch_num)
 
-    preds, image_ids = load_experiments_predictions(EXPERIMENTS)
+    preds, image_ids = load_experiments_predictions(STACK_FEATURES_EXPERIMENTS)
 
     for experiment in STACK_EXPERIMENTS:
         print("Predict stacking experiment", experiment)
