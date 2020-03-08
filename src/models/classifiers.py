@@ -49,7 +49,10 @@ def get_pooler(pooler):
 class Classifier(nn.Module):
     def __init__(self, in_features, num_classes, pooler='avgpool'):
         super().__init__()
-        self.pooler = get_pooler(pooler)
+        if pooler is not None:
+            self.pooler = get_pooler(pooler)
+        else:
+            self.pooler = None
         self.grapheme_root_fc = nn.Linear(in_features,
                                           config.n_grapheme_roots)
         self.vowel_diacritic_fc = nn.Linear(in_features,
@@ -58,8 +61,9 @@ class Classifier(nn.Module):
                                                 config.n_consonant_diacritics)
 
     def forward(self, x):
-        x = self.pooler(x)
-        x = torch.flatten(x, 1)
+        if self.pooler is not None:
+            x = self.pooler(x)
+            x = torch.flatten(x, 1)
 
         grapheme = self.grapheme_root_fc(x)
         vowel = self.vowel_diacritic_fc(x)
