@@ -27,14 +27,18 @@ def initialize_ema(model, decay=0.9999, device='', resume=''):
                                resume=resume)
 
 
-def blend_predictions(probs_df_lst, use_gmean=True):
+def blend_predictions(probs_df_lst, blend_type='mean'):
     blend_df = probs_df_lst[0].copy()
     blend_values = np.stack([df.loc[blend_df.index.values].values
                              for df in probs_df_lst], axis=0)
-    if use_gmean:
+    if blend_type == 'gmean':
         blend_values = gmean(blend_values, axis=0)
-    else:
+    elif blend_type == 'mean':
         blend_values = np.mean(blend_values, axis=0)
+    elif blend_type == 'max':
+        blend_values = np.max(blend_values, axis=0)
+    else:
+        ValueError(f"Unknown blend type: {blend_type}")
 
     blend_df.values[:] = blend_values
     return blend_df
