@@ -12,23 +12,15 @@ from src import config
 
 
 EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
+    'effb3ns_002',
 ]
 
-STACK_FEATURES_EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
-]
+STACK_FEATURES_EXPERIMENTS = []
 
-STACK_EXPERIMENTS = [
-    'stacking_001'
-]
+STACK_EXPERIMENTS = []
 
 BLEND_EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
-    'stacking_001'
+    'effb3ns_002'
 ]
 
 BLEND_SOFTMAX = True
@@ -259,22 +251,22 @@ if __name__ == "__main__":
                                       device=DEVICE)
                 predict_test(test_data, predictor, experiment, fold, batch_num)
 
-    preds, image_ids = load_experiments_predictions(STACK_FEATURES_EXPERIMENTS)
+    if STACK_FEATURES_EXPERIMENTS and STACK_EXPERIMENTS:
+        preds, image_ids = load_experiments_predictions(STACK_FEATURES_EXPERIMENTS)
+        for experiment in STACK_EXPERIMENTS:
+            print("Predict stacking experiment", experiment)
+            for fold in config.folds:
+                fold_dir = config.experiments_dir / experiment / f'fold_{fold}'
 
-    for experiment in STACK_EXPERIMENTS:
-        print("Predict stacking experiment", experiment)
-        for fold in config.folds:
-            fold_dir = config.experiments_dir / experiment / f'fold_{fold}'
+                model_path = get_best_model_path(fold_dir)
 
-            model_path = get_best_model_path(fold_dir)
+                print("Predict fold", fold)
+                print("Model path", model_path)
+                predictor = StackPredictor(model_path,
+                                           batch_size=BATCH_SIZE,
+                                           device=DEVICE)
 
-            print("Predict fold", fold)
-            print("Model path", model_path)
-            predictor = StackPredictor(model_path,
-                                       batch_size=BATCH_SIZE,
-                                       device=DEVICE)
-
-            predict_stacking_test(preds, predictor, experiment, fold)
+                predict_stacking_test(preds, predictor, experiment, fold)
 
     print("Blend folds predictions")
     blend_test_predictions()
