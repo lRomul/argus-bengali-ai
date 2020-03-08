@@ -2,3 +2,4 @@
 !.gitignore
 !README.md
 !bengali-ai-deps/git_clone.sh
+!black_list_001.json

@@ -23,14 +23,15 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [313, 156, 156]
-TRAIN_EPOCHS = [40, 160, 20]
+BATCH_SIZE = [448, 224, 224]
+TRAIN_EPOCHS = [40, 180, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = True
 USE_EMA = True
 DEVICES = ['cuda']
+BLACKLIST = config.input_data_dir / 'black_list_001.json'
 
 
 def get_lr(base_lr, batch_size):
@@ -39,13 +40,13 @@ def get_lr(base_lr, batch_size):
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
-    'nn_module': ('CustomEfficient', {
-        'encoder': 'tf_efficientnet_b3_ns',
+    'nn_module': ('CustomResnet', {
+        'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'classifier': ('fc', {'pooler': None})
+        'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 1.0,
+        'grapheme_weight': 2.0,
         'vowel_weight': 1.0,
         'consonant_weight': 1.0,
         'smooth_factor': 0.1,
@@ -58,6 +59,10 @@ PARAMS = {
 
 def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
+    black_list = None
+    if BLACKLIST is not None:
+        with open(BLACKLIST) as file:
+            black_list = json.load(file)
 
     model = BengaliAiModel(PARAMS)
     model.params['nn_module'][1]['pretrained'] = False
@@ -90,7 +95,8 @@ def train_fold(save_dir, train_folds, val_folds):
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
                                          transform=train_transform,
-                                         mixer=mixer)
+                                         mixer=mixer,
+                                         black_list=black_list)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
