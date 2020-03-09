@@ -23,12 +23,12 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [313, 156, 156]
-TRAIN_EPOCHS = [40, 160, 20]
+BATCH_SIZE = [160, 80, 80]
+TRAIN_EPOCHS = [40, 140, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
-USE_AMP = True
+USE_AMP = False
 USE_EMA = True
 DEVICES = ['cuda']
 BLACKLIST = config.input_data_dir / 'black_list_001.json'
@@ -46,7 +46,7 @@ PARAMS = {
         'classifier': ('fc', {'pooler': None})
     }),
     'loss': ('BengaliAiCrossEntropy', {
-        'grapheme_weight': 1.0,
+        'grapheme_weight': 2.0,
         'vowel_weight': 1.0,
         'consonant_weight': 1.0,
         'smooth_factor': 0.1,
