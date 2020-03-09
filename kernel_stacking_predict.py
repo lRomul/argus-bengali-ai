@@ -13,15 +13,27 @@ from src import config
 
 
 EXPERIMENTS = [
+    'cooldown_004_nf',
+    'cooldown_005',
     'effb3ns_002',
+    'effb3ns_004',
 ]
 
-STACK_FEATURES_EXPERIMENTS = []
+STACK_FEATURES_EXPERIMENTS = [
+    'cooldown_004_nf',
+    'cooldown_005',
+]
 
-STACK_EXPERIMENTS = []
+STACK_EXPERIMENTS = [
+    'stacking_001'
+]
 
 BLEND_EXPERIMENTS = [
-    'effb3ns_002'
+    'cooldown_004_nf',
+    'cooldown_005',
+    'effb3ns_002',
+    'effb3ns_004',
+    'stacking_001'
 ]
 
 BLEND_SOFTMAX = True
@@ -86,7 +98,7 @@ def load_fold_experiment_pred(experiment_preds_dir, fold):
     preds_path = experiment_preds_dir / f'fold_{fold}' / f'preds.npz'
     if not preds_path.exists():
         raise FileNotFoundError
-    npz_preds = np.load()
+    npz_preds = np.load(preds_path)
 
     grapheme_pred = npz_preds['grapheme_pred']
     vowel_pred = npz_preds['vowel_pred']
