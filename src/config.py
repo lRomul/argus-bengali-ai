@@ -28,7 +28,7 @@ sample_submission = input_data_dir / 'sample_submission.csv'
 raw_image_shape = 137, 236
 
 class_map_csv_path = input_data_dir / 'class_map.csv'
-test_image_data_paths = sorted(input_data_dir.glob('test_image_data_*.parquet'))
+test_image_data_paths = sorted(input_data_dir.glob('train_image_data_*.parquet'))
 train_image_data_paths = sorted(input_data_dir.glob('train_image_data_*.parquet'))
 
 train_folds_path = output_data_dir / 'train_folds.csv'

@@ -13,15 +13,27 @@ from src import config
 
 
 EXPERIMENTS = [
+    'cooldown_004_nf',
+    'cooldown_005',
     'effb3ns_002',
+    'effb3ns_004',
 ]
 
-STACK_FEATURES_EXPERIMENTS = []
+STACK_FEATURES_EXPERIMENTS = [
+    'cooldown_004_nf',
+    'cooldown_005',
+]
 
-STACK_EXPERIMENTS = []
+STACK_EXPERIMENTS = [
+    'stacking_001'
+]
 
 BLEND_EXPERIMENTS = [
-    'effb3ns_002'
+    'cooldown_004_nf',
+    'cooldown_005',
+    'effb3ns_002',
+    'effb3ns_004',
+    'stacking_001'
 ]
 
 BLEND_SOFTMAX = True
