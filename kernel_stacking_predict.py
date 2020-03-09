@@ -15,8 +15,10 @@ from src import config
 EXPERIMENTS = [
     'cooldown_004_nf',
     'cooldown_005',
-    'effb3ns_002',
-    'effb3ns_004',
+    'effb3ns_002_004',
+    'ig_resnext101_fv2',
+    'tf_efficientnet_b3_ns_cl_fv2',
+    'tf_efficientnet_b5_ns_fv2'
 ]
 
 STACK_FEATURES_EXPERIMENTS = [
@@ -31,9 +33,11 @@ STACK_EXPERIMENTS = [
 BLEND_EXPERIMENTS = [
     'cooldown_004_nf',
     'cooldown_005',
-    'effb3ns_002',
-    'effb3ns_004',
-    'stacking_001'
+    'effb3ns_002_004',
+    'stacking_001',
+    'ig_resnext101_fv2',
+    'tf_efficientnet_b3_ns_cl_fv2',
+    'tf_efficientnet_b5_ns_fv2'
 ]
 
 BLEND_SOFTMAX = True
@@ -187,8 +191,9 @@ def get_class_prediction_df(class_name):
             fold_prediction_path = config.tmp_predictions_dir / experiment \
                                    / f'fold_{fold}' / 'preds.npz'
             if not fold_prediction_path.exists():
-                print(f"Skip {class_name} {fold_prediction_path}")
                 continue
+
+            print(f"Get predictions {class_name} {fold_prediction_path}")
             
             preds = np.load(fold_prediction_path)
             class_preds = preds[class_name.split('_')[0] + '_pred']
@@ -254,7 +259,12 @@ if __name__ == "__main__":
     print("Time", datetime.now())
 
     transforms = get_transforms(train=False, size=IMAGE_SIZE)
-    test_data_generator = get_test_data_generator(batch=DATA_BATCH, engine='fastparquet')
+    if config.kernel_mode:
+        parquet_engine = 'fastparquet'
+    else:
+        parquet_engine = 'auto'
+    test_data_generator = get_test_data_generator(batch=DATA_BATCH,
+                                                  engine=parquet_engine)
 
     for batch_num, test_data in enumerate(test_data_generator):
         print(datetime.now(), "Predict batch", batch_num)
@@ -284,8 +294,8 @@ if __name__ == "__main__":
             try:
                 concat_fold_experiment_pred(experiment_preds_dir, fold)
             except FileNotFoundError as e:
-                print(datetime.now(), f"Skip fold {fold} {experiment}")
                 continue
+            print(datetime.now(), f"Concat fold {fold} {experiment}")
 
     if STACK_FEATURES_EXPERIMENTS and STACK_EXPERIMENTS:
         preds, image_ids = load_experiments_predictions(STACK_FEATURES_EXPERIMENTS)

@@ -5,6 +5,7 @@ from argus.utils import deep_detach
 
 from src.models.custom_resnet import CustomResnet
 from src.models.custom_efficient import CustomEfficient
+from src.models.n01z3_model import N01z3Model
 from src.losses import BengaliAiCrossEntropy
 from src.optimizers import Over9000, RAdam
 
@@ -12,7 +13,8 @@ from src.optimizers import Over9000, RAdam
 class BengaliAiModel(Model):
     nn_module = {
         'CustomResnet': CustomResnet,
-        'CustomEfficient': CustomEfficient
+        'CustomEfficient': CustomEfficient,
+        'N01z3Model': N01z3Model
     }
     loss = {
         'BengaliAiCrossEntropy': BengaliAiCrossEntropy
