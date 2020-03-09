@@ -75,7 +75,8 @@ class BengaliAiDataset(Dataset):
                  folds=None,
                  target=True,
                  transform=None,
-                 mixer=None):
+                 mixer=None,
+                 black_list=None):
         self.folds = folds
         self.target = target
         self.transform = transform
@@ -84,6 +85,12 @@ class BengaliAiDataset(Dataset):
             self.data = data
         else:
             self.data = [s for s in data if s['fold'] in folds]
+
+        if black_list is not None:
+            black_set = set(black_list)
+            print(f"Remove {len(black_set)} samples from {len(self.data)} ", end='')
+            self.data = [s for s in self.data if s['image_id'] not in black_set]
+            print(f"to {len(self.data)}")
 
     def __len__(self):
         return len(self.data)

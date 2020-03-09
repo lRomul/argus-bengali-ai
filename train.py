@@ -31,6 +31,7 @@ NUM_WORKERS = 8
 USE_AMP = True
 USE_EMA = True
 DEVICES = ['cuda']
+BLACKLIST = config.input_data_dir / 'black_list_001.json'
 
 
 def get_lr(base_lr, batch_size):
@@ -58,6 +59,10 @@ PARAMS = {
 
 def train_fold(save_dir, train_folds, val_folds):
     folds_data = get_folds_data()
+    black_list = None
+    if BLACKLIST is not None:
+        with open(BLACKLIST) as file:
+            black_list = json.load(file)
 
     model = BengaliAiModel(PARAMS)
     model.params['nn_module'][1]['pretrained'] = False
@@ -90,7 +95,8 @@ def train_fold(save_dir, train_folds, val_folds):
 
         train_dataset = BengaliAiDataset(folds_data, train_folds,
                                          transform=train_transform,
-                                         mixer=mixer)
+                                         mixer=mixer,
+                                         black_list=black_list)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
