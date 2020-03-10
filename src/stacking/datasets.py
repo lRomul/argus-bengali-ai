@@ -65,13 +65,17 @@ def get_folds_stacking_data(experiments):
     for prob, image_id in zip(probs, image_ids):
         sample = train_folds_dict[image_id]
         sample['prob'] = prob
+        sample['image_id'] = image_id
         folds_data.append(sample)
 
     return folds_data
 
 
 class StackingDataset(Dataset):
-    def __init__(self, data, folds, size=None, target=True):
+    def __init__(self, data, folds,
+                 size=None,
+                 target=True,
+                 black_list=None):
         super().__init__()
         self.folds = folds
         self.size = size
@@ -81,6 +85,12 @@ class StackingDataset(Dataset):
             self.data = data
         else:
             self.data = [s for s in data if s['fold'] in folds]
+
+        if black_list is not None:
+            black_set = set(black_list)
+            print(f"Remove {len(black_set)} samples from {len(self.data)} ", end='')
+            self.data = [s for s in self.data if s['image_id'] not in black_set]
+            print(f"to {len(self.data)}")
 
     def __len__(self):
         if self.size is None:

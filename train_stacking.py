@@ -16,7 +16,7 @@ from src.utils import initialize_ema
 from src import config
 
 
-STACKING_EXPERIMENT = "stacking_003"
+STACKING_EXPERIMENT = "stacking_004"
 
 EXPERIMENTS = [
     'cooldown_004_nf',
@@ -29,6 +29,7 @@ RS_PARAMS = {"base_size": 256, "reduction_scale": 4, "p_dropout": 0.024465629717
 BATCH_SIZE = RS_PARAMS['batch_size']
 DATASET_SIZE = 128 * 256
 NUM_WORKERS = 2
+BLACKLIST = config.input_data_dir / 'black_list_001.json'
 
 SAVE_DIR = config.experiments_dir / STACKING_EXPERIMENT
 PARAMS = {
@@ -53,8 +54,10 @@ PARAMS = {
 }
 
 
-def train_fold(save_dir, train_folds, val_folds, folds_data):
-    train_dataset = StackingDataset(folds_data, train_folds, size=DATASET_SIZE)
+def train_fold(save_dir, train_folds, val_folds, folds_data, black_list):
+    train_dataset = StackingDataset(folds_data, train_folds,
+                                    size=DATASET_SIZE,
+                                    black_list=black_list)
     val_dataset = StackingDataset(folds_data, val_folds)
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE,
@@ -100,6 +103,10 @@ if __name__ == "__main__":
         json.dump(PARAMS, outfile)
 
     folds_data = get_folds_stacking_data(EXPERIMENTS)
+    black_list = None
+    if BLACKLIST is not None:
+        with open(BLACKLIST) as file:
+            black_list = json.load(file)
 
     for fold in config.folds:
         val_folds = [fold]
@@ -107,4 +114,4 @@ if __name__ == "__main__":
         save_fold_dir = SAVE_DIR / f'fold_{fold}'
         print(f"Val folds: {val_folds}, Train folds: {train_folds}")
         print(f"Fold save dir {save_fold_dir}")
-        train_fold(save_fold_dir, train_folds, val_folds, folds_data)
+        train_fold(save_fold_dir, train_folds, val_folds, folds_data, black_list)
