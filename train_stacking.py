@@ -16,11 +16,12 @@ from src.utils import initialize_ema
 from src import config
 
 
-STACKING_EXPERIMENT = "stacking_001"
+STACKING_EXPERIMENT = "stacking_003"
 
 EXPERIMENTS = [
     'cooldown_004_nf',
     'cooldown_005',
+    'effb3ns_004'
 ]
 USE_EMA = False
 RS_PARAMS = {"base_size": 256, "reduction_scale": 4, "p_dropout": 0.02446562971778976, "lr": 4.796301375650003e-05,
@@ -48,6 +49,7 @@ PARAMS = {
     }),
     'optimizer': ('Adam', {'lr': RS_PARAMS['lr']}),
     'device': 'cuda',
+    'experiments': EXPERIMENTS
 }
 
 

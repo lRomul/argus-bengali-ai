@@ -15,7 +15,7 @@ args = parser.parse_args()
 EXPERIMENT_DIR = config.experiments_dir / args.experiment
 PREDICTION_DIR = config.predictions_dir / args.experiment
 DEVICE = 'cuda'
-BATCH_SIZE = 256
+BATCH_SIZE = 32
 IMAGE_SIZE = None
 
 
