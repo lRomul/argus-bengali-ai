@@ -23,8 +23,8 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [160, 80, 80]
-TRAIN_EPOCHS = [40, 140, 20]
+BATCH_SIZE = [224, 112, 112]
+TRAIN_EPOCHS = [40, 160, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -40,10 +40,10 @@ def get_lr(base_lr, batch_size):
 
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
-    'nn_module': ('CustomEfficient', {
-        'encoder': 'tf_efficientnet_b3_ns',
+    'nn_module': ('CustomResnet', {
+        'encoder': 'gluon_resnet50_v1d',
         'pretrained': True,
-        'classifier': ('fc', {'pooler': None})
+        'classifier': ('fc', {'pooler': 'avgpool'})
     }),
     'loss': ('BengaliAiCrossEntropy', {
         'grapheme_weight': 2.0,
