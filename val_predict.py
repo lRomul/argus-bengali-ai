@@ -47,6 +47,10 @@ if __name__ == "__main__":
         fold_dir = EXPERIMENT_DIR / f'fold_{fold}'
         model_path = get_best_model_path(fold_dir)
 
+        if model_path is None:
+            print("Skip fold", fold)
+            continue
+
         print("Model path", model_path)
         predictor = Predictor(model_path,
                               batch_size=BATCH_SIZE,
