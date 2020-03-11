@@ -23,12 +23,12 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [88, 44, 44]
+BATCH_SIZE = [313, 156, 156]
 TRAIN_EPOCHS = [40, 120, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
-USE_AMP = False
+USE_AMP = True
 USE_EMA = True
 DEVICES = ['cuda']
 BLACKLIST = config.input_data_dir / 'black_list_001.json'
@@ -41,7 +41,7 @@ def get_lr(base_lr, batch_size):
 SAVE_DIR = config.experiments_dir / args.experiment
 PARAMS = {
     'nn_module': ('CustomEfficient', {
-        'encoder': 'tf_efficientnet_b5_ns',
+        'encoder': 'tf_efficientnet_b3_ns',
         'pretrained': True,
         'classifier': ('fc', {'pooler': None})
     }),
@@ -50,7 +50,7 @@ PARAMS = {
         'vowel_weight': 1.0,
         'consonant_weight': 1.0,
         'smooth_factor': 0.1,
-        'ohem_rate': 0.8
+        'ohem_rate': 0.4
     }),
     'optimizer': ('AdamW', {'lr': get_lr(BASE_LR, BATCH_SIZE[0])}),
     'device': DEVICES[0],
