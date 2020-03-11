@@ -1,4 +1,7 @@
+import os
 import json
+import argparse
+from subprocess import Popen
 
 from argus.callbacks import (
     EarlyStopping,
@@ -16,12 +19,18 @@ from src.utils import initialize_ema
 from src import config
 
 
-STACKING_EXPERIMENT = "stacking_004"
+parser = argparse.ArgumentParser()
+parser.add_argument('--fold', required=False, type=int)
+args = parser.parse_args()
+
+
+STACKING_EXPERIMENT = "stacking_005"
 
 EXPERIMENTS = [
     'cooldown_004_nf',
     'cooldown_005',
-    'effb3ns_004'
+    'effb3ns_004',
+    'effb3ns_005_nf',
 ]
 USE_EMA = False
 RS_PARAMS = {"base_size": 256, "reduction_scale": 4, "p_dropout": 0.02446562971778976, "lr": 4.796301375650003e-05,
@@ -90,28 +99,41 @@ def train_fold(save_dir, train_folds, val_folds, folds_data, black_list):
 
 
 if __name__ == "__main__":
-    if not SAVE_DIR.exists():
-        SAVE_DIR.mkdir(parents=True, exist_ok=True)
-    else:
-        print(f"Folder {SAVE_DIR} already exists.")
+    if args.fold is None:
+        pipes = []
+        for fold in config.folds:
+            command = [
+                'python',
+                os.path.abspath(__file__),
+                '--fold', str(fold)
+            ]
+            pipe = Popen(command)
+            pipes.append(pipe)
 
-    with open(SAVE_DIR / 'source.py', 'w') as outfile:
-        outfile.write(open(__file__).read())
+        for pipe in pipes:
+            pipe.wait()
+    elif args.fold in config.folds:
+        if not SAVE_DIR.exists():
+            SAVE_DIR.mkdir(parents=True, exist_ok=True)
+        else:
+            print(f"Folder {SAVE_DIR} already exists.")
 
-    print("Model params", PARAMS)
-    with open(SAVE_DIR / 'params.json', 'w') as outfile:
-        json.dump(PARAMS, outfile)
+        with open(SAVE_DIR / 'source.py', 'w') as outfile:
+            outfile.write(open(__file__).read())
 
-    folds_data = get_folds_stacking_data(EXPERIMENTS)
-    black_list = None
-    if BLACKLIST is not None:
-        with open(BLACKLIST) as file:
-            black_list = json.load(file)
+        print("Model params", PARAMS)
+        with open(SAVE_DIR / 'params.json', 'w') as outfile:
+            json.dump(PARAMS, outfile)
 
-    for fold in config.folds:
-        val_folds = [fold]
+        folds_data = get_folds_stacking_data(EXPERIMENTS)
+        black_list = None
+        if BLACKLIST is not None:
+            with open(BLACKLIST) as file:
+                black_list = json.load(file)
+
+        val_folds = [args.fold]
         train_folds = list(set(config.folds) - set(val_folds))
-        save_fold_dir = SAVE_DIR / f'fold_{fold}'
+        save_fold_dir = SAVE_DIR / f'fold_{args.fold}'
         print(f"Val folds: {val_folds}, Train folds: {train_folds}")
         print(f"Fold save dir {save_fold_dir}")
         train_fold(save_fold_dir, train_folds, val_folds, folds_data, black_list)
