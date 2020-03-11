@@ -76,15 +76,22 @@ class BengaliAiDataset(Dataset):
                  target=True,
                  transform=None,
                  mixer=None,
-                 black_list=None):
+                 black_list=None,
+                 use_unseen=True):
         self.folds = folds
         self.target = target
         self.transform = transform
         self.mixer = mixer
-        if folds is None:
-            self.data = data
-        else:
-            self.data = [s for s in data if s['fold'] in folds]
+
+        self.data = data
+
+        if folds is not None:
+            self.data = [s for s in self.data if s['fold'] in folds]
+
+        if not use_unseen:
+            print(f"Remove unseen samples from {len(self.data)} ", end='')
+            self.data = [s for s in self.data if not s['unseen']]
+            print(f"to {len(self.data)}")
 
         if black_list is not None:
             black_set = set(black_list)
