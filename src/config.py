@@ -31,7 +31,7 @@ class_map_csv_path = input_data_dir / 'class_map.csv'
 test_image_data_paths = sorted(input_data_dir.glob('test_image_data_*.parquet'))
 train_image_data_paths = sorted(input_data_dir.glob('train_image_data_*.parquet'))
 
-train_folds_path = output_data_dir / 'train_folds_unseen.csv'
+train_folds_path = output_data_dir / 'train_folds_unseen_v2.csv'
 if kernel_mode:
     experiments_dir = Path('/kaggle/input/bengali-ai-dataset/')
 else:
