@@ -8,8 +8,8 @@ from src import config
 
 
 if __name__ == '__main__':
-    random_state = 47
-    num_unseen_graphemes = 100
+    random_state = 43
+    num_unseen_graphemes = 200
 
     random.seed(random_state)
     np.random.seed(random_state)
