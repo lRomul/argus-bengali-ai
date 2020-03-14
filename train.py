@@ -22,10 +22,11 @@ parser.add_argument('--experiment', required=True, type=str)
 parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
-IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [88, 44, 44]
-TRAIN_EPOCHS = [40, 120, 20]
-COOLDOWN = [False, False, True]
+IMAGE_SIZE = [128, 128, None, None, None, None, None, None]
+BATCH_SIZE = [88, 88, 44, 44, 44, 44, 44, 44]
+TRAIN_EPOCHS = [20, 20, 20, 20, 20, 20, 20, 20]
+OHEM_RATES = [1.0, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
+COOLDOWN = [False, False, False, False, False, False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
 USE_AMP = False
@@ -78,10 +79,13 @@ def train_fold(save_dir, train_folds, val_folds):
     lr_scheduler = CosineAnnealingLR(T_max=sum(TRAIN_EPOCHS), eta_min=1e-5)
     prev_batch = BATCH_SIZE[0]
 
-    for image_size, batch_size, epochs, cooldown in zip(IMAGE_SIZE, BATCH_SIZE,
-                                                        TRAIN_EPOCHS, COOLDOWN):
+    for image_size, batch_size, epochs, cooldown, ohem_rate in zip(IMAGE_SIZE, BATCH_SIZE,
+                                                                   TRAIN_EPOCHS, COOLDOWN,
+                                                                   OHEM_RATES):
         print(f"Start train step: image_size {image_size}, batch_size {batch_size},"
-              f" epochs {epochs}, cooldown {cooldown}")
+              f" epochs {epochs}, cooldown {cooldown}, ohem rate {ohem_rate}")
+
+        model.loss.loss.ohem_rate = ohem_rate
 
         batch_lr_scale = batch_size / prev_batch
         model.set_lr(model.get_lr() * batch_lr_scale)

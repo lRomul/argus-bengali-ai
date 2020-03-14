@@ -66,11 +66,11 @@ class BengaliAiCrossEntropy(nn.Module):
         self.smooth_factor = smooth_factor
         self.ohem_rate = ohem_rate
 
-        loss = SmoothingOhemCrossEntropy(smooth_factor=smooth_factor,
-                                         ohem_rate=ohem_rate)
-        self.grapheme_ce = loss
-        self.vowel_ce = loss
-        self.consonant_ce = loss
+        self.loss = SmoothingOhemCrossEntropy(smooth_factor=smooth_factor,
+                                              ohem_rate=ohem_rate)
+        self.grapheme_ce = self.loss
+        self.vowel_ce = self.loss
+        self.consonant_ce = self.loss
 
     def __call__(self, pred, target, training=False):
         grapheme_pred, vowel_pred, consonant_pred = pred
