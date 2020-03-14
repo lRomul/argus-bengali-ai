@@ -2,7 +2,7 @@ import random
 import numpy as np
 import pandas as pd
 
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 
 from src import config
 
@@ -16,9 +16,9 @@ if __name__ == '__main__':
     train_df = pd.read_csv(config.train_csv_path)
     train_df['fold'] = -1
 
-    kf = KFold(n_splits=config.n_folds, random_state=random_state, shuffle=True)
+    kf = StratifiedKFold(n_splits=config.n_folds, random_state=random_state, shuffle=True)
 
-    for fold, (_, val_index) in enumerate(kf.split(train_df)):
+    for fold, (_, val_index) in enumerate(kf.split(train_df, train_df.grapheme)):
         train_df.iloc[val_index, -1] = fold
 
     grapheme2idx = {grapheme: idx for idx, grapheme in enumerate(train_df.grapheme.unique())}

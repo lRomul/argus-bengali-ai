@@ -23,12 +23,12 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
-BATCH_SIZE = [160, 80, 80]
-TRAIN_EPOCHS = [40, 120, 20]
+BATCH_SIZE = [313, 156, 156]
+TRAIN_EPOCHS = [30, 90, 20]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
-USE_AMP = False
+USE_AMP = True
 USE_EMA = True
 DEVICES = ['cuda']
 BLACKLIST = config.input_data_dir / 'black_list_001.json'
