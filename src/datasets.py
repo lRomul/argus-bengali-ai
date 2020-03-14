@@ -7,6 +7,7 @@ import gc
 import torch
 from torch.utils.data import Dataset
 
+from src.draw import BengaliDrawDataset
 from src import config
 
 
@@ -77,11 +78,16 @@ class BengaliAiDataset(Dataset):
                  transform=None,
                  mixer=None,
                  black_list=None,
-                 use_unseen=True):
+                 use_unseen=True,
+                 draw_prob=0.0):
         self.folds = folds
         self.target = target
         self.transform = transform
         self.mixer = mixer
+        self.draw_dataset = BengaliDrawDataset(config.fonts_dir,
+                                               transform,
+                                               mixer)
+        self.draw_prob = draw_prob
 
         self.data = data
 
@@ -132,7 +138,11 @@ class BengaliAiDataset(Dataset):
                 image = self.transform(image)
             return image
         else:
-            image, target = self.get_sample(idx)
+            if self.draw_prob > random.random():
+                random_index = np.random.randint(0, len(self.draw_dataset))
+                image, target = self.draw_dataset.get_sample(random_index)
+            else:
+                image, target = self.get_sample(idx)
             if self.mixer is not None:
                 image, target = self.mixer(self, image, target)
             if self.transform is not None:
