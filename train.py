@@ -96,7 +96,8 @@ def train_fold(save_dir, train_folds, val_folds):
         train_dataset = BengaliAiDataset(folds_data, train_folds,
                                          transform=train_transform,
                                          mixer=mixer,
-                                         black_list=black_list)
+                                         black_list=black_list,
+                                         draw_prob=0.3)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
