@@ -13,30 +13,31 @@ from src import config
 
 
 EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
-    'effb3ns_004',
-    'effb3ns_005_nf',
+    'effb5ns_001_nf',
+    'unseen_002'
 ]
 
 STACK_FEATURES_EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
-    'effb3ns_004',
-    'effb3ns_005_nf',
+
 ]
 
 STACK_EXPERIMENTS = [
-    'stacking_005'
+
 ]
 
 BLEND_EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
-    'effb3ns_004',
-    'effb3ns_005_nf',
-    'stacking_005'
+    'effb5ns_001_nf',
 ]
+
+UNSEEN_EXPERIMENTS = [
+    'unseen_002'
+]
+
+UNSEEN_MAX_THRESHOLDS = {
+    'grapheme_root': 0.6,
+    'vowel_diacritic': 0.6,
+    'consonant_diacritic': 0.7
+}
 
 BLEND_SOFTMAX = True
 FOLDS_BLEND_TYPE = 'mean'
@@ -181,9 +182,9 @@ def predict_stacking_test(probs, predictor, experiment, fold):
     )
 
 
-def get_class_prediction_df(class_name):
+def get_class_prediction_df(class_name, experiments):
     probs_df_lst = []
-    for experiment in BLEND_EXPERIMENTS:
+    for experiment in experiments:
         experiment_probs_df_lst = []
         for fold in config.folds:
             fold_prediction_path = config.tmp_predictions_dir / experiment \
@@ -226,11 +227,33 @@ def get_class_prediction_df(class_name):
     return pred_df
 
 
+def detect_unseen(class_name2pred_df):
+    unseen_image_ids = []
+    for class_name, threshold in UNSEEN_MAX_THRESHOLDS.items():
+        pred_df = class_name2pred_df[class_name]
+        unseen_index = np.max(pred_df.values, axis=1) < threshold
+        unseen_image_ids += list(pred_df.loc[unseen_index].index)
+    return list(set(unseen_image_ids))
+
+
 def blend_test_predictions():
     row_ids = []
     pred_lst = []
+
+    class_name2pred_df = dict()
     for class_name in config.class_map.keys():
-        pred_df = get_class_prediction_df(class_name)
+        pred_df = get_class_prediction_df(class_name, BLEND_EXPERIMENTS)
+        class_name2pred_df[class_name] = pred_df
+
+    unseen_image_ids = detect_unseen(class_name2pred_df)
+
+    if unseen_image_ids:
+        for class_name in config.class_map.keys():
+            unseen_pred_df = get_class_prediction_df(class_name, UNSEEN_EXPERIMENTS)
+            pred_df = class_name2pred_df[class_name]
+            pred_df.loc[unseen_image_ids].values[:] = unseen_pred_df.loc[unseen_image_ids].values
+
+    for class_name,  pred_df in class_name2pred_df.items():
         prediction = np.argmax(pred_df.values, axis=1)
 
         for image_id, pred in zip(pred_df.index, prediction):
@@ -248,6 +271,8 @@ if __name__ == "__main__":
     print("Stack features experiments:", STACK_FEATURES_EXPERIMENTS)
     print("Stack experiments:", STACK_EXPERIMENTS)
     print("Blend experiments:", BLEND_EXPERIMENTS)
+    print("Unseen experiments", UNSEEN_EXPERIMENTS)
+    print("Unseen max thresholds", UNSEEN_MAX_THRESHOLDS)
     print("Blend softmax:", BLEND_SOFTMAX)
     print("Folds blend type:", FOLDS_BLEND_TYPE)
     print("Experiments blend type:", EXPERIMENTS_BLEND_TYPE)
