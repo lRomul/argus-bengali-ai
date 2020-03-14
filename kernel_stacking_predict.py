@@ -34,8 +34,8 @@ UNSEEN_EXPERIMENTS = [
 ]
 
 UNSEEN_MAX_THRESHOLDS = {
-    'grapheme_root': 0.6,
-    'vowel_diacritic': 0.6,
+    'grapheme_root': 0.65,
+    'vowel_diacritic': 0.65,
     'consonant_diacritic': 0.7
 }
 
@@ -251,7 +251,7 @@ def blend_test_predictions():
         for class_name in config.class_map.keys():
             unseen_pred_df = get_class_prediction_df(class_name, UNSEEN_EXPERIMENTS)
             pred_df = class_name2pred_df[class_name]
-            pred_df.loc[unseen_image_ids].values[:] = unseen_pred_df.loc[unseen_image_ids].values
+            pred_df.loc[unseen_image_ids] = unseen_pred_df.loc[unseen_image_ids]
 
     for class_name,  pred_df in class_name2pred_df.items():
         prediction = np.argmax(pred_df.values, axis=1)
