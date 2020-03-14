@@ -9,7 +9,7 @@ from src import config
 
 if __name__ == '__main__':
     random_state = 43
-    num_unseen_graphemes = 300
+    num_unseen_graphemes = 600
 
     random.seed(random_state)
     np.random.seed(random_state)
