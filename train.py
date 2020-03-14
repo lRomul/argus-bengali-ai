@@ -86,7 +86,6 @@ def train_fold(save_dir, train_folds, val_folds):
               f" epochs {epochs}, cooldown {cooldown}, ohem rate {ohem_rate}")
 
         model.loss.loss.ohem_rate = ohem_rate
-
         batch_lr_scale = batch_size / prev_batch
         model.set_lr(model.get_lr() * batch_lr_scale)
 
