@@ -9,7 +9,7 @@ from src import config
 
 if __name__ == '__main__':
     random_state = 47
-    num_unseen_graphemes = 26
+    num_unseen_graphemes = 100
 
     random.seed(random_state)
     np.random.seed(random_state)
@@ -21,9 +21,6 @@ if __name__ == '__main__':
 
     for fold, (_, val_index) in enumerate(kf.split(train_df)):
         train_df.iloc[val_index, -1] = fold
-
-    grapheme2idx = {grapheme: idx for idx, grapheme in enumerate(train_df.grapheme.unique())}
-    train_df['grapheme_id'] = train_df['grapheme'].map(grapheme2idx)
 
     grapheme_root2grapheme_count = dict()
     for grapheme_root in train_df.grapheme_root.unique():
@@ -39,7 +36,7 @@ if __name__ == '__main__':
         train_df.grapheme_root.isin(set(grapheme_root_for_unseen))].grapheme.unique()
     unseen_graphemes = np.random.choice(graphemes_for_unseen, num_unseen_graphemes, replace=False)
 
-    for grapheme in train_df[train_df.grapheme.isin(unseen_graphemes)].grapheme.unique():
+    for grapheme in unseen_graphemes:
         fold = np.random.randint(0, config.n_folds)
         train_df.loc[train_df.grapheme == grapheme, 'fold'] = fold
 
