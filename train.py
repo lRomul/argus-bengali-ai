@@ -24,7 +24,7 @@ args = parser.parse_args()
 
 IMAGE_SIZE = [128, None, None]
 BATCH_SIZE = [313, 156, 156]
-TRAIN_EPOCHS = [30, 90, 20]
+TRAIN_EPOCHS = [30, 100, 10]
 COOLDOWN = [False, False, True]
 BASE_LR = 0.001
 NUM_WORKERS = 8
@@ -32,7 +32,6 @@ USE_AMP = True
 USE_EMA = True
 DEVICES = ['cuda']
 BLACKLIST = config.input_data_dir / 'black_list_001.json'
-USE_UNSEEN_IN_TRAIN = False
 
 
 def get_lr(base_lr, batch_size):
@@ -98,8 +97,7 @@ def train_fold(save_dir, train_folds, val_folds):
                                          transform=train_transform,
                                          mixer=mixer,
                                          black_list=black_list,
-                                         use_unseen=USE_UNSEEN_IN_TRAIN,
-                                         draw_prob=0.2)
+                                         draw_prob=0.3)
         val_dataset = BengaliAiDataset(folds_data, val_folds, transform=test_transform)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size,
