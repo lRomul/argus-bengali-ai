@@ -24,13 +24,11 @@ parser.add_argument('--fold', required=False, type=int)
 args = parser.parse_args()
 
 
-STACKING_EXPERIMENT = "stacking_005"
+STACKING_EXPERIMENT = "stacking_007"
 
 EXPERIMENTS = [
-    'cooldown_004_nf',
-    'cooldown_005',
-    'effb3ns_004',
-    'effb3ns_005_nf',
+    'effb3ns_005',
+    'tf_efficientnet_b5_ns_cl_fv2',
 ]
 USE_EMA = False
 RS_PARAMS = {"base_size": 256, "reduction_scale": 4, "p_dropout": 0.02446562971778976, "lr": 4.796301375650003e-05,
