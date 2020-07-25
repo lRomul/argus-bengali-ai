@@ -1,7 +1,7 @@
 import torch
 
 from argus import Model
-from argus.utils import deep_detach
+from argus.utils import deep_to, deep_detach
 
 from src.stacking.models import FCNet
 from src.losses import BengaliAiCrossEntropy
@@ -23,7 +23,7 @@ class StackingModel(Model):
     def train_step(self, batch, state) -> dict:
         self.train()
         self.optimizer.zero_grad()
-        input, target = self.prepare_batch(batch, self.device)
+        input, target = deep_to(batch, self.device, non_blocking=True)
         prediction = self.nn_module(input)
         loss = self.loss(prediction, target, training=True)
         if self.amp is not None:
@@ -49,7 +49,7 @@ class StackingModel(Model):
     def val_step(self, batch, state) -> dict:
         self.eval()
         with torch.no_grad():
-            input, target = self.prepare_batch(batch, self.device)
+            input, target = deep_to(batch, self.device, non_blocking=True)
             if self.model_ema is None:
                 prediction = self.nn_module(input)
             else:

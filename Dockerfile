@@ -36,7 +36,7 @@ RUN pip3 install --no-cache-dir \
     notebook==6.0.2 \
     scikit-learn==0.22.1 \
     scikit-image==0.16.2 \
-    pytorch-argus==0.0.9 \
+    pytorch-argus==0.1.1 \
     pyarrow==0.15.1 \
     fastparquet==0.3.2 \
     Pillow==6.2.2 \

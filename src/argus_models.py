@@ -1,7 +1,7 @@
 import torch
 
 from argus import Model, optimizer
-from argus.utils import deep_detach
+from argus.utils import deep_to, deep_detach
 
 from src.models.custom_resnet import CustomResnet
 from src.models.custom_efficient import CustomEfficient
@@ -33,7 +33,7 @@ class BengaliAiModel(Model):
     def train_step(self, batch, state) -> dict:
         self.train()
         self.optimizer.zero_grad()
-        input, target = self.prepare_batch(batch, self.device)
+        input, target = deep_to(batch, self.device, non_blocking=True)
         prediction = self.nn_module(input)
         loss = self.loss(prediction, target, training=True)
         if self.amp is not None:
@@ -59,7 +59,7 @@ class BengaliAiModel(Model):
     def val_step(self, batch, state) -> dict:
         self.eval()
         with torch.no_grad():
-            input, target = self.prepare_batch(batch, self.device)
+            input, target = deep_to(batch, self.device, non_blocking=True)
             if self.model_ema is None:
                 prediction = self.nn_module(input)
             else:

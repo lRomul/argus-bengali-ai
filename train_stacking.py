@@ -84,7 +84,7 @@ def train_fold(save_dir, train_folds, val_folds, folds_data, black_list):
 
     model.fit(train_loader,
               val_loader=val_loader,
-              max_epochs=RS_PARAMS['epochs'],
+              num_epochs=RS_PARAMS['epochs'],
               callbacks=callbacks,
               metrics=['hierarchical_recall'])
 

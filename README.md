@@ -38,6 +38,11 @@ The provided dockerfile is supplied to build image with cuda support and cudnn.
 make
 ```
 
+* Create a file with folds split
+```bash
+python make_folds.py
+```
+
 * Train model
 ```bash
 python train.py --experiment train_001
