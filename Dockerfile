@@ -27,23 +27,9 @@ RUN git clone https://github.com/NVIDIA/apex &&\
     pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" . &&\
     cd .. && rm -rf apex
 
-# Install python ML packages
-RUN pip3 install --no-cache-dir \
-    opencv-python==4.1.2.30 \
-    scipy==1.4.1 \
-    matplotlib==3.1.2 \
-    pandas==0.25.3 \
-    notebook==6.0.2 \
-    scikit-learn==0.22.1 \
-    scikit-image==0.16.2 \
-    pytorch-argus==0.1.1 \
-    pyarrow==0.15.1 \
-    fastparquet==0.3.2 \
-    Pillow==6.2.2 \
-    cnn-finetune==0.6.0 \
-    albumentations==0.4.3
-
-RUN pip install timm==0.1.18
+# Install python packages
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 ENV PYTHONPATH $PYTHONPATH:/workdir
 ENV TORCH_HOME=/workdir/data/.torch
