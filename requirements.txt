@@ -5,7 +5,7 @@ opencv-python==4.1.2.30
 scipy==1.4.1
 matplotlib==3.1.2
 pandas==0.25.3
-notebook==6.4.1
+notebook==6.4.12
 scikit-learn==0.22.1
 scikit-image==0.16.2
 pytorch-argus==0.1.2
